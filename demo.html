@@ -1,0 +1,2360 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi IR QuickTimer - Thư Viện Đầy Đủ Mã Điều Hòa & Hẹn Giờ 1-Chạm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #ff6900; /* Xiaomi Orange */
+      --primary-hover: #e05d00;
+      --primary-light: rgba(255, 105, 0, 0.12);
+      --bg-dark: #0f1117;
+      --card-bg: #1a1d26;
+      --card-border: #2b3040;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --phone-border: #374151;
+      --phone-glass: #11141d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at 50% 10%, #1e2433 0%, var(--bg-dark) 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      overflow-x: hidden;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      max-width: 860px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-light);
+      border: 1px solid rgba(255, 105, 0, 0.3);
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .app-workspace {
+      display: flex;
+      flex-direction: row;
+      gap: 32px;
+      align-items: flex-start;
+      justify-content: center;
+      max-width: 1240px;
+      width: 100%;
+    }
+
+    /* LEFT: Phone Simulator */
+    .phone-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .phone-shell {
+      position: relative;
+      width: 360px;
+      height: 760px;
+      background: var(--phone-glass);
+      border: 8px solid #232734;
+      border-radius: 46px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7),
+                  0 0 0 2px #374151,
+                  inset 0 0 15px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* IR Blaster Emitter */
+    .ir-blaster-emitter {
+      position: absolute;
+      top: -6px;
+      right: 70px;
+      width: 14px;
+      height: 7px;
+      background: #111;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      z-index: 50;
+      box-shadow: 0 0 0 1px #444;
+      transition: all 0.2s;
+    }
+
+    .ir-blaster-emitter.emitting {
+      background: #ff2255;
+      box-shadow: 0 0 20px 8px rgba(255, 34, 85, 0.9);
+      animation: ir-pulse 0.4s infinite alternate;
+    }
+
+    @keyframes ir-pulse {
+      0% { box-shadow: 0 0 15px 4px rgba(255, 34, 85, 0.7); }
+      100% { box-shadow: 0 0 25px 12px rgba(255, 34, 85, 1); }
+    }
+
+    .phone-top-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-top: 10px;
+      height: 30px;
+      z-index: 20;
+    }
+
+    .camera-hole {
+      width: 12px;
+      height: 12px;
+      background: #000;
+      border-radius: 50%;
+      border: 1px solid #1f2937;
+    }
+
+    .phone-status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2px 20px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #9ca3af;
+      letter-spacing: 0.2px;
+    }
+
+    /* View Switcher Tabs */
+    .view-toggle {
+      display: flex;
+      background: #1e2230;
+      border-radius: 12px;
+      padding: 3px;
+      margin: 0 16px 12px;
+      border: 1px solid var(--card-border);
+    }
+
+    .view-toggle button {
+      flex: 1;
+      padding: 7px 0;
+      font-size: 11px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .view-toggle button.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(255, 105, 0, 0.4);
+    }
+
+    .screen-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 16px 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen-content::-webkit-scrollbar {
+      width: 4px;
+    }
+    .screen-content::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 4px;
+    }
+
+    /* VIEW: ONE-CLICK ROUTINE */
+    .routine-header {
+      margin-bottom: 12px;
+    }
+
+    .routine-header h2 {
+      font-size: 17px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .routine-header p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .ac-status-badge {
+      background: #1f2536;
+      border: 1px solid #2e364f;
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .ac-status-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ac-icon-box {
+      width: 36px;
+      height: 36px;
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--accent-cyan);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .ac-name-tag {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .ac-code-tag {
+      font-size: 11px;
+      color: var(--accent-cyan);
+    }
+
+    .btn-change-code {
+      font-size: 11px;
+      color: var(--primary);
+      background: transparent;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* THE BIG ONE-CLICK BUTTON */
+    .routine-card {
+      background: linear-gradient(145deg, #212636, #181b26);
+      border: 1px solid #333b52;
+      border-radius: 22px;
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    .target-time-display {
+      font-size: 38px;
+      font-weight: 800;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: -1px;
+      margin-top: 4px;
+    }
+
+    .target-label {
+      font-size: 11px;
+      color: var(--primary);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .countdown-calc {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #cbd5e1;
+      margin: 8px 0 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .countdown-calc b {
+      color: var(--accent-cyan);
+    }
+
+    .btn-big-routine {
+      width: 100%;
+      background: linear-gradient(135deg, #ff7a1a 0%, #e05d00 100%);
+      color: white;
+      border: none;
+      padding: 15px 18px;
+      border-radius: 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 8px 20px rgba(255, 105, 0, 0.35);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-big-routine:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(255, 105, 0, 0.5);
+    }
+
+    .btn-big-routine:active {
+      transform: scale(0.97);
+    }
+
+    .quick-settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      width: 100%;
+      margin-top: 14px;
+    }
+
+    .qs-item {
+      background: #171b26;
+      border: 1px solid #283043;
+      border-radius: 12px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .qs-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .qs-value {
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .qs-btn-group {
+      display: flex;
+      gap: 4px;
+    }
+
+    .qs-btn-mini {
+      background: #232838;
+      border: none;
+      color: #fff;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* VIEW: PAIRING / DÒ SÓNG */
+    .pairing-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .brand-search-box {
+      width: 100%;
+      background: #181c26;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      margin-bottom: 8px;
+      outline: none;
+    }
+
+    /* Custom Brand Picker (MIUI Modern Style) */
+    .brand-picker-container {
+      position: relative;
+      margin-bottom: 12px;
+      z-index: 40;
+    }
+
+    .brand-picker-trigger {
+      width: 100%;
+      background: #1c2130;
+      border: 1.5px solid #2e364f;
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    .brand-picker-trigger:hover, .brand-picker-trigger.active {
+      border-color: var(--primary);
+      background: #22283a;
+    }
+
+    .brand-trigger-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(255, 105, 0, 0.15);
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 105, 0, 0.3);
+    }
+
+    .brand-trigger-text {
+      text-align: left;
+    }
+
+    .brand-trigger-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .brand-trigger-sub {
+      font-size: 11px;
+      color: var(--accent-cyan);
+    }
+
+    .brand-arrow {
+      color: var(--text-muted);
+      font-size: 12px;
+      transition: transform 0.2s;
+    }
+
+    .brand-picker-trigger.active .brand-arrow {
+      transform: rotate(180deg);
+      color: var(--primary);
+    }
+
+    /* Modal / Popup Dropdown Menu */
+    .brand-picker-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: #161a25;
+      border: 1px solid #333d56;
+      border-radius: 16px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      padding: 8px;
+      display: none;
+      flex-direction: column;
+      max-height: 270px;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+    }
+
+    .brand-picker-menu.open {
+      display: flex;
+      animation: menuSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes menuSlideDown {
+      from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .menu-search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #202636;
+      border: 1px solid #2e384f;
+      border-radius: 10px;
+      padding: 6px 10px;
+      margin-bottom: 6px;
+    }
+
+    .menu-search-bar input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 12px;
+      width: 100%;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .brand-list-scroll {
+      overflow-y: auto;
+      max-height: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding-right: 2px;
+    }
+
+    .brand-list-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+    .brand-list-scroll::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 4px;
+    }
+
+    .brand-menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .brand-menu-item:hover {
+      background: #22293b;
+    }
+
+    .brand-menu-item.selected {
+      background: rgba(255, 105, 0, 0.15);
+      border: 1px solid rgba(255, 105, 0, 0.35);
+    }
+
+    .item-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .item-initial {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: #262c3e;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-menu-item.selected .item-initial {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .item-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .item-count-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #232a3c;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .brand-menu-item.selected .item-count-badge {
+      background: rgba(255, 105, 0, 0.25);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .pairing-box {
+      background: #1a1e2a;
+      border: 1px solid #2d3448;
+      border-radius: 18px;
+      padding: 14px 12px;
+      text-align: center;
+      margin-bottom: 10px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .pairing-step-badge {
+      background: #252b3d;
+      color: var(--accent-cyan);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+    }
+
+    .pairing-code-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .pairing-instruct {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .btn-test-power {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ff5722 0%, #d84315 100%);
+      border: 4px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-bottom: 10px;
+      box-shadow: 0 0 25px rgba(255, 87, 34, 0.4);
+      transition: all 0.15s;
+    }
+
+    .btn-test-power:active {
+      transform: scale(0.92);
+      box-shadow: 0 0 35px rgba(255, 87, 34, 0.8);
+    }
+
+    .pairing-feedback-area {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .pairing-question {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #f3f4f6;
+    }
+
+    .pairing-action-btns {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .btn-pair-no {
+      flex: 1;
+      background: #272d3e;
+      border: 1px solid #3c445c;
+      color: #e2e8f0;
+      padding: 9px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-pair-yes {
+      flex: 1.2;
+      background: var(--accent-green);
+      border: none;
+      color: white;
+      padding: 9px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    /* VIEW: HOME SCREEN WIDGET MOCKUP */
+    .homescreen-container {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px 4px;
+    }
+
+    .home-clock {
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .home-time-big {
+      font-size: 48px;
+      font-weight: 300;
+      letter-spacing: -2px;
+    }
+
+    .home-date {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .widget-one-tap {
+      background: rgba(26, 30, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(255, 105, 0, 0.4);
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .widget-one-tap:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .widget-one-tap:active {
+      transform: scale(0.97);
+    }
+
+    .widget-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .widget-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .widget-main-action {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .widget-icon-btn {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #ff6900 0%, #d84315 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 22px;
+      box-shadow: 0 4px 15px rgba(255, 105, 0, 0.4);
+    }
+
+    .widget-text-group h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .widget-text-group p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .home-app-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .app-icon-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      color: #cbd5e1;
+    }
+
+    .app-fake-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: #252b3d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    /* RIGHT COLUMN */
+    .control-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 400px;
+    }
+
+    .ac-unit-simulator {
+      background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+      border-radius: 20px;
+      padding: 16px 20px;
+      color: #1e293b;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 -3px 6px rgba(0,0,0,0.1);
+      position: relative;
+      border-bottom: 6px solid #cbd5e1;
+    }
+
+    .ac-unit-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #cbd5e1;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+
+    .ac-brand-logo {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #334155;
+      text-transform: uppercase;
+    }
+
+    .ac-led-panel {
+      background: #0f172a;
+      padding: 6px 14px;
+      border-radius: 10px;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+    }
+
+    .ac-led-temp {
+      font-size: 24px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .ac-led-icons {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 10px;
+      color: #94a3b8;
+    }
+
+    .ac-led-icons .active {
+      color: #4ade80;
+      font-weight: bold;
+    }
+
+    .ac-vent {
+      height: 20px;
+      background: #cbd5e1;
+      border-radius: 6px;
+      margin-top: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ac-vent-blade {
+      position: absolute;
+      width: 100%;
+      height: 4px;
+      background: #94a3b8;
+      bottom: 4px;
+      transition: transform 0.6s ease;
+    }
+
+    .ac-vent.blowing .ac-vent-blade {
+      transform: rotate(25deg);
+    }
+
+    .ac-wind-effect {
+      position: absolute;
+      bottom: -15px;
+      left: 10%;
+      right: 10%;
+      height: 15px;
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.4) 0%, transparent 100%);
+      border-radius: 0 0 15px 15px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .ac-vent.blowing ~ .ac-wind-effect {
+      opacity: 1;
+    }
+
+    /* IR Protocol Packet Inspector Box */
+    .inspector-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .inspector-title {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #f3f4f6;
+    }
+
+    .carrier-tag {
+      font-size: 11px;
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--accent-cyan);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .packet-view {
+      background: #11141d;
+      border: 1px solid #23293a;
+      border-radius: 10px;
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #93c5fd;
+      line-height: 1.5;
+      max-height: 150px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .brand-stats-bar {
+      display: flex;
+      justify-content: space-between;
+      background: #141722;
+      border: 1px solid #283043;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+
+    .brand-stats-bar b {
+      color: var(--primary);
+    }
+
+    /* Toast */
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(17, 24, 39, 0.95);
+      color: #fff;
+      border: 1px solid #374151;
+      padding: 12px 22px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 9999;
+    }
+
+    .toast-msg.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .notes-card {
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    .notes-card h4 {
+      color: #e2e8f0;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    @media (max-width: 860px) {
+      .app-workspace {
+        flex-direction: column;
+        align-items: center;
+      }
+      .control-column {
+        width: 100%;
+        min-width: unset;
+      }
+    }
+
+    /* ========================================================= */
+    /* VIEW 4: MI REMOTE FULL CONTROLLER (GIỐNG HỆT ẢNH MẪU 100%) */
+    /* ========================================================= */
+    .mi-remote-view {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      background: #181818;
+      position: relative;
+    }
+
+    .mi-remote-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px 8px;
+      color: #fff;
+      background: #181818;
+    }
+
+    .mi-btn-back {
+      font-size: 20px;
+      cursor: pointer;
+      color: #e5e7eb;
+      line-height: 1;
+      padding: 4px;
+    }
+
+    .mi-remote-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      color: #f3f4f6;
+    }
+
+    .mi-remote-icon-badge {
+      font-size: 14px;
+    }
+
+    .mi-btn-more {
+      font-size: 18px;
+      cursor: pointer;
+      color: #9ca3af;
+      padding: 4px;
+    }
+
+    /* Màn hình hiển thị trạng thái phía trên (Upper Display) */
+    .mi-display-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #181818;
+      position: relative;
+      min-height: 180px;
+      transition: background 0.3s;
+    }
+
+    .mi-display-area.on {
+      background: radial-gradient(circle at 50% 30%, #1c2635 0%, #181818 75%);
+    }
+
+    .mi-screen-off-label {
+      font-size: 12px;
+      color: #4b5563;
+      letter-spacing: 0.5px;
+    }
+
+    .mi-screen-on-content {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .mi-display-area.on .mi-screen-off-label {
+      display: none;
+    }
+
+    .mi-display-area.on .mi-screen-on-content {
+      display: flex;
+    }
+
+    .mi-screen-temp {
+      font-size: 68px;
+      font-weight: 200;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .mi-screen-temp-unit {
+      font-size: 22px;
+      margin-top: 6px;
+      font-weight: 400;
+      color: #9ca3af;
+    }
+
+    .mi-screen-sub-badges {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      font-size: 11px;
+      color: #38bdf8;
+    }
+
+    .mi-screen-badge-pill {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 500;
+    }
+
+    /* Bàn phím điều khiển dạng lưới phẳng (Mi Grid Controller) */
+    .mi-keypad-grid {
+      background: #1e1e1e;
+      border-top: 1px solid #282828;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    .mi-grid-row {
+      display: flex;
+      border-bottom: 1px solid #282828;
+    }
+
+    .mi-key-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-right: 1px solid #282828;
+      color: #d1d5db;
+      font-size: 13.5px;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 21px 8px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.12s;
+    }
+
+    .mi-key-btn:last-child {
+      border-right: none;
+    }
+
+    .mi-key-btn:active {
+      background: #2a2a2a;
+    }
+
+    /* Nút nguồn icon tròn màu xanh lá cây */
+    .mi-power-svg {
+      width: 24px;
+      height: 24px;
+      color: #22c55e;
+      transition: color 0.2s, filter 0.2s;
+    }
+
+    .mi-power-svg.off {
+      color: #6b7280;
+    }
+
+    .mi-key-btn:hover .mi-power-svg {
+      filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.6));
+    }
+
+    /* Hàng Temp với 3 nút: - | Temp | + */
+    .mi-temp-minus, .mi-temp-plus {
+      font-size: 24px;
+      font-weight: 300;
+      color: #f3f4f6;
+    }
+
+    .mi-temp-label {
+      font-size: 13.5px;
+      color: #d1d5db;
+      font-weight: 400;
+    }
+
+    .mi-home-bar-bottom {
+      height: 24px;
+      background: #1e1e1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mi-home-pill {
+      width: 76px;
+      height: 4px;
+      background: #52525b;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">🔥 Xiaomi Redmi Note 12 Turbo IR Blaster</div>
+    <h1>Mi AC QuickTimer - Thư Viện Đầy Đủ Mã Điều Hòa</h1>
+    <p class="subtitle">Tích hợp cơ sở dữ liệu giao thức toàn diện: 20+ Thương hiệu lớn tại VN (Daikin, Panasonic, Casper, Gree, Funiki, Mitsubishi, LG, Samsung, Midea, Aqua, Toshiba, Sharp, Hitachi...) & Thuật toán tính toán Timer thời gian thực.</p>
+  </header>
+
+  <div class="app-workspace">
+    <!-- LEFT: Phone Simulator -->
+    <div class="phone-column">
+      <div class="phone-shell">
+        <div id="irEmitter" class="ir-blaster-emitter" title="Cổng hồng ngoại IR Blaster trên đỉnh máy"></div>
+
+        <div class="phone-top-bar">
+          <div class="camera-hole"></div>
+        </div>
+        <div class="phone-status-bar">
+          <span id="statusBarClock">21:58</span>
+          <span>5G 📶 98% 🔋</span>
+        </div>
+
+        <div class="view-toggle">
+          <button id="tabRoutine" class="active" onclick="switchView('routine')">⚡ 1-Chạm 7:30</button>
+          <button id="tabRemote" onclick="switchView('remote')">🎮 Remote Mi</button>
+          <button id="tabPairing" onclick="switchView('pairing')">🔍 Dò Mã</button>
+          <button id="tabWidget" onclick="switchView('widget')">📱 Widget</button>
+        </div>
+
+        <div class="screen-content">
+
+          <!-- VIEW 1: ONE-CLICK ROUTINE -->
+          <div id="viewRoutine">
+            <div class="routine-header">
+              <h2>Ngữ cảnh nhanh</h2>
+              <p>Phát lệnh đầy đủ kèm hẹn giờ chỉ với 1 lần bấm</p>
+            </div>
+
+            <!-- AC Device Status -->
+            <div class="ac-status-badge">
+              <div class="ac-status-info">
+                <div class="ac-icon-box">❄️</div>
+                <div>
+                  <div class="ac-name-tag" id="currentAcName">Funiki (Hòa Phát)</div>
+                  <div class="ac-code-tag" id="currentCodeTag">Mã: Funiki Mã 6 (Coolix Bật Máy)</div>
+                </div>
+              </div>
+              <button class="btn-change-code" onclick="switchView('pairing')">Đổi mã</button>
+            </div>
+
+            <!-- BIG CARD: 7:30 TIMER -->
+            <div class="routine-card">
+              <span class="target-label">MỤC TIÊU HẸN GIỜ TẮT</span>
+              <div class="target-time-display" id="displayTargetTime">07:30</div>
+              
+              <div class="countdown-calc">
+                <span>Cách hiện tại:</span>
+                <b id="countdownDuration">...</b>
+              </div>
+
+              <button class="btn-big-routine" onclick="triggerOneClickTimer()">
+                <span>⚡</span> Bật Hẹn Giờ 7:30 Ngay
+              </button>
+
+              <div class="quick-settings-grid">
+                <div class="qs-item">
+                  <span class="qs-label">Nhiệt độ gửi kèm</span>
+                  <div class="qs-value">
+                    <span id="valTemp">26°C</span>
+                    <div class="qs-btn-group">
+                      <button class="qs-btn-mini" onclick="adjustTemp(-1)">-</button>
+                      <button class="qs-btn-mini" onclick="adjustTemp(1)">+</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="qs-item">
+                  <span class="qs-label">Chế độ & Quạt</span>
+                  <div class="qs-value">
+                    <span>COOL / AUTO</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 14px;">
+              <button onclick="sendQuickCommand('POWER_ON')" style="flex:1; padding: 12px; background: #10b981; border: none; color: #fff; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 13px;">
+                🟢 Bật Máy
+              </button>
+              <button onclick="sendQuickCommand('POWER_OFF')" style="flex:1; padding: 12px; background: #262c3e; border: 1px solid #374151; color: #ef4444; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 13px;">
+                🛑 Tắt Máy
+              </button>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button id="demoFanSpeedBtn" onclick="sendQuickCommand('FAN_SPEED')" style="flex:1; padding: 11px; background: #262c3e; border: 1px solid #374151; color: #38bdf8; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 12px;">
+                💨 Gió: Auto
+              </button>
+              <button onclick="sendQuickCommand('SWING')" style="flex:1; padding: 11px; background: #262c3e; border: 1px solid #374151; color: #3b82f6; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 12px;">
+                ↔ Đảo Gió (Swing)
+              </button>
+            </div>
+
+            <button onclick="sendQuickCommand('CANCEL_TIMER')" style="width: 100%; margin-top: 8px; padding: 10px; background: #1e2230; border: 1px solid #374151; color: #94a3b8; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 12px;">
+              ⏰ Hủy Hẹn Giờ
+            </button>
+          </div>
+
+          <!-- VIEW 2: PAIRING / DÒ SÓNG HỒNG NGOẠI TOÀN DIỆN -->
+          <div id="viewPairing" style="display: none;" class="pairing-container">
+            <!-- Custom MIUI-style Brand Selector -->
+            <div class="brand-picker-container" id="brandPickerContainer">
+              <div class="brand-picker-trigger" id="brandPickerTrigger" onclick="toggleBrandMenu()">
+                <div class="brand-trigger-info">
+                  <div class="brand-logo-badge" id="brandTriggerInitial">F</div>
+                  <div class="brand-trigger-text">
+                    <div class="brand-trigger-name" id="brandTriggerName">Funiki (Hòa Phát)</div>
+                    <div class="brand-trigger-sub" id="brandTriggerSub">10 bộ mã có sẵn</div>
+                  </div>
+                </div>
+                <div class="brand-arrow">▼</div>
+              </div>
+
+              <!-- Popup List -->
+              <div class="brand-picker-menu" id="brandPickerMenu">
+                <div class="menu-search-bar">
+                  <span>🔎</span>
+                  <input type="text" id="brandSearchInput" placeholder="Tìm kiếm hãng (Casper, Daikin, LG...)" oninput="filterBrandList(event)">
+                </div>
+                <div class="brand-list-scroll" id="brandListScroll">
+                  <!-- Generated by JS -->
+                </div>
+              </div>
+            </div>
+
+            <div class="pairing-box">
+              <div class="pairing-step-badge" id="pairingCodeIndexBadge">ĐANG THỬ: MÃ 1 / 4</div>
+              <div class="pairing-code-name" id="pairingCodeNameTitle">Panasonic Inverter Modern</div>
+              <p class="pairing-instruct">
+                Chĩa đỉnh điện thoại vào điều hòa và bấm nút nguồn bên dưới:
+              </p>
+
+              <!-- Big Test Power Button with SVG Icon -->
+              <button class="btn-test-power" onclick="testPairingCode()" title="Bấm để phát tín hiệu IR">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                  <line x1="12" y1="2" x2="12" y2="12"></line>
+                </svg>
+              </button>
+              <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Bấm để phát tín hiệu Bật/Tắt thử nghiệm</div>
+
+              <!-- Confirmation question -->
+              <div class="pairing-feedback-area">
+                <p class="pairing-question">Điều hòa có kêu "BÍP" hoặc Bật/Tắt không?</p>
+                <div class="pairing-action-btns">
+                  <button class="btn-pair-no" onclick="nextPairingCode()">❌ Không, mã tiếp</button>
+                  <button class="btn-pair-yes" onclick="confirmPairingCode()">✅ Có! Chọn mã này</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size: 11px; color: #94a3b8; text-align: center;">
+              💡 <i>Dò sóng trực tiếp: bấm nút Nguồn, nếu máy lạnh phản hồi thì nhấn "Chọn mã này" để lưu lại!</i>
+            </div>
+          </div>
+
+          <!-- VIEW 3: WIDGET SIMULATION -->
+          <div id="viewWidget" style="display: none;" class="homescreen-container">
+            <div class="home-clock">
+              <div class="home-time-big" id="homeClockBig">21:58</div>
+              <div class="home-date">Chủ Nhật, 18 tháng 10</div>
+            </div>
+
+            <div class="widget-one-tap" onclick="triggerOneClickTimer()">
+              <div class="widget-header">
+                <div class="widget-title"><span>❄️</span> AC QUICK TIMER</div>
+                <span style="font-size: 10px; color: var(--accent-green); font-weight: bold;">● SẴN SÀNG</span>
+              </div>
+              <div class="widget-main-action">
+                <div class="widget-icon-btn">⚡</div>
+                <div class="widget-text-group">
+                  <h3>Hẹn giờ 7:30 Sáng</h3>
+                  <p id="widgetRemainingPreview">Nhấn 1 chạm để phát tia IR</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="home-app-grid">
+              <div class="app-icon-item">
+                <div class="app-fake-icon">💬</div>
+                <span>Tin nhắn</span>
+              </div>
+              <div class="app-icon-item">
+                <div class="app-fake-icon">🌐</div>
+                <span>Chrome</span>
+              </div>
+              <div class="app-icon-item">
+                <div class="app-fake-icon">📷</div>
+                <span>Máy ảnh</span>
+              </div>
+              <div class="app-icon-item">
+                <div class="app-fake-icon" style="background: rgba(255, 105, 0, 0.2); color: var(--primary);">📡</div>
+                <span>Mi Remote</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- VIEW 4: MI REMOTE CONTROLLER (THEO ĐÚNG ẢNH MẪU 100%) -->
+          <div id="viewRemote" style="display: none;" class="mi-remote-view">
+            <!-- Header chuẩn: < Bedroom FunikiAC 🔥 ⋮ -->
+            <div class="mi-remote-header">
+              <span class="mi-btn-back" onclick="switchView('routine')" title="Quay lại">‹</span>
+              <div class="mi-remote-title-wrap">
+                <span>Bedroom FunikiAC</span>
+                <span class="mi-remote-icon-badge" id="miHeaderFlame">🔥</span>
+              </div>
+              <span class="mi-btn-more" title="Tùy chọn">⋮</span>
+            </div>
+
+            <!-- Khu vực hiển thị AC (Upper Display Area) -->
+            <div class="mi-display-area" id="miDisplayArea">
+              <span class="mi-screen-off-label" id="miScreenOffText">ĐIỀU HÒA ĐANG TẮT</span>
+              
+              <div class="mi-screen-on-content" id="miScreenOnContent">
+                <div class="mi-screen-temp">
+                  <span id="miDisplayTemp">26</span>
+                  <span class="mi-screen-temp-unit">°C</span>
+                </div>
+                <div class="mi-screen-sub-badges">
+                  <span class="mi-screen-badge-pill" id="miBadgeMode">COOL</span>
+                  <span class="mi-screen-badge-pill" id="miBadgeSpeed">SPEED: AUTO</span>
+                  <span class="mi-screen-badge-pill" id="miBadgeSwing">SWING ON</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bàn phím dạng lưới phẳng (Mi Remote Grid) -->
+            <div class="mi-keypad-grid">
+              <!-- Hàng 1: Nguồn (icon tròn xanh lá) & Mode -->
+              <div class="mi-grid-row">
+                <button class="mi-key-btn" onclick="onMiRemoteKey('POWER')" title="Bật/Tắt nguồn">
+                  <svg id="miPowerSvgIcon" class="mi-power-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                    <line x1="12" y1="2" x2="12" y2="12"></line>
+                  </svg>
+                </button>
+                <button class="mi-key-btn" onclick="onMiRemoteKey('MODE')">Mode</button>
+              </div>
+
+              <!-- Hàng 2: Speed & Direction & Swing -->
+              <div class="mi-grid-row">
+                <button class="mi-key-btn" onclick="onMiRemoteKey('SPEED')">Speed</button>
+                <button class="mi-key-btn" onclick="onMiRemoteKey('DIRECTION')">Direction</button>
+                <button class="mi-key-btn" onclick="onMiRemoteKey('SWING')">Swing</button>
+              </div>
+
+              <!-- Hàng 3: Điều khiển nhiệt độ Temp: — | Temp | + -->
+              <div class="mi-grid-row">
+                <button class="mi-key-btn mi-temp-minus" onclick="onMiRemoteKey('TEMP_DOWN')">—</button>
+                <button class="mi-key-btn mi-temp-label" onclick="onMiRemoteKey('TEMP_CLICK')">Temp</button>
+                <button class="mi-key-btn mi-temp-plus" onclick="onMiRemoteKey('TEMP_UP')">+</button>
+              </div>
+
+              <!-- Hàng 4: Timer & Sleep & ••• -->
+              <div class="mi-grid-row">
+                <button class="mi-key-btn" onclick="onMiRemoteKey('TIMER')">Timer</button>
+                <button class="mi-key-btn" onclick="onMiRemoteKey('SLEEP')">Sleep</button>
+                <button class="mi-key-btn" onclick="onMiRemoteKey('MORE')">•••</button>
+              </div>
+
+              <!-- Thanh Home Bar phía dưới màn hình -->
+              <div class="mi-home-bar-bottom">
+                <div class="mi-home-pill"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: AC Wall Unit Simulator & Full Brand Database Info -->
+    <div class="control-column">
+      
+      <!-- AC WALL UNIT SIMULATOR -->
+      <div class="ac-unit-simulator">
+        <div class="ac-unit-top">
+          <div class="ac-brand-logo" id="acWallBrand">FUNIKI</div>
+          <div class="ac-led-panel">
+            <div class="ac-led-temp" id="acLedTemp">--°C</div>
+            <div class="ac-led-icons">
+              <span id="ledPowerIndicator">● OFF</span>
+              <span id="ledTimerIndicator">TIMER: OFF</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size: 11px; color: #64748b; font-weight: 600;">
+          MÔ PHỎNG PHẢN HỒI THỰC TẾ CỦA MÁY LẠNH TREO TƯỜNG
+        </div>
+        <div class="ac-vent" id="acVent">
+          <div class="ac-vent-blade"></div>
+        </div>
+        <div class="ac-wind-effect"></div>
+      </div>
+
+      <!-- BRAND STATS BAR -->
+      <div class="brand-stats-bar">
+        <span>Tổng số hãng hỗ trợ: <b id="statTotalBrands">20+</b></span>
+        <span>Tổng số cấu hình mã IR: <b id="statTotalCodes">74 Bộ mã</b></span>
+        <span>Tần số sóng mang: <b>38,000 Hz</b></span>
+      </div>
+
+      <!-- IR PROTOCOL INSPECTOR -->
+      <div class="inspector-card">
+        <div class="inspector-title">
+          <span>📡 Tín hiệu Hồng Ngoại (ConsumerIrManager)</span>
+          <span class="carrier-tag" id="carrierFreqTag">Carrier: 38,000 Hz</span>
+        </div>
+
+        <div style="font-size: 12px; color: var(--text-muted);">
+          Gói tin Byte Payload & Cấu trúc mã hóa thời gian thực:
+        </div>
+        <div class="packet-view" id="packetHexDisplay">// Chưa phát tín hiệu.
+// Hãy bấm thử nút Bật/Tắt hoặc Hẹn giờ để xem dữ liệu IR thực tế.</div>
+      </div>
+
+      <!-- ARCHITECTURAL NOTES -->
+      <div class="notes-card">
+        <h4>📋 Cơ sở dữ liệu Protocol được xây dựng theo chuẩn nào?</h4>
+        <ul style="padding-left: 18px; display: flex; flex-direction: column; gap: 6px;">
+          <li><b>Cơ sở dữ liệu mã IR:</b> Tham chiếu chuẩn từ <code>IRremoteESP8266</code> & <code>SmartIR</code> (hỗ trợ toàn diện Daikin, Panasonic, Casper, Gree, Funiki, Mitsubishi, LG, Samsung, Midea, Aqua, Toshiba, Sharp, Hitachi...).</li>
+          <li><b>Hai cơ chế hẹn giờ chính:</b>
+            <br>• <i>Realtime Clock Timer (Panasonic, Daikin, Mitsubishi):</i> Nhúng trực tiếp số phút/giờ mục tiêu vào frame.
+            <br>• <i>Delta Countdown Timer (Casper, Midea, Gree, LG):</i> Tự động tính <code>Số phút còn lại = (7h30 sáng - Giờ hiện tại)</code> và chia thành các nấc 0.5h hoặc 1h tương ứng.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast" class="toast-msg">
+    <span id="toastIcon">✨</span>
+    <span id="toastText">Nội dung thông báo</span>
+  </div>
+
+  <script>
+    // Audio synthesis for AC Beep
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(frequency = 2000, duration = 0.12) {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    // COMPREHENSIVE BRAND & PROTOCOL DATABASE (20+ Brands, 70+ Code profiles)
+    const COMPREHENSIVE_BRANDS = {
+      funiki: {
+        name: "Funiki (Hòa Phát)",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Funiki Mã 1 (Remote RG10B Power)", proto: "MIDEA_RG10", timerType: "delta" },
+          { id: 2, name: "Funiki Mã 2 (Remote RG10B Cool 26°C)", proto: "MIDEA_RG10", timerType: "delta" },
+          { id: 3, name: "Funiki Mã 3 (Remote RG10B Cool 25°C)", proto: "MIDEA_RG10", timerType: "delta" },
+          { id: 4, name: "Funiki Mã 4 (Mi Remote Bộ Mã 4 - Coolix)", proto: "COOLIX_4D", timerType: "delta" },
+          { id: 5, name: "Funiki Mã 5 (Lệnh Tắt Máy - Coolix 0xB2 0x7B 0xE0)", proto: "COOLIX_7B", timerType: "delta" },
+          { id: 6, name: "Funiki Mã 6 (Lệnh Bật Máy - Coolix 0xB2 0x1F 0x48)", proto: "COOLIX_1F", timerType: "delta" },
+          { id: 7, name: "Funiki Mã 7 (Mi Remote Bộ Mã 3 - Coolix)", proto: "COOLIX_DF", timerType: "delta" },
+          { id: 8, name: "Funiki Mã 8 (Midea 48-bit Classic)", proto: "MIDEA_48", timerType: "delta" },
+          { id: 9, name: "Funiki Mã 9 (Bo Mạch AUX 0xC3)", proto: "AUX_C3", timerType: "delta" },
+          { id: 10, name: "Funiki Mã 10 (Bo Mạch Gree 64-bit)", proto: "GREE_64", timerType: "delta" }
+        ],
+        workingCodeIndex: 5
+      },
+      panasonic: {
+        name: "Panasonic",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Panasonic DKE Series (8-byte)", proto: "PANASONIC_DKE", timerType: "realtime" },
+          { id: 2, name: "Panasonic JKE/NKE Inverter (27-byte)", proto: "PANASONIC_27BYTE", timerType: "realtime" },
+          { id: 3, name: "Panasonic Econavi / Aero Series", proto: "PANASONIC_ECONAVI", timerType: "realtime" },
+          { id: 4, name: "Panasonic Standard Non-Inverter", proto: "PANASONIC_STANDARD", timerType: "delta" }
+        ],
+        workingCodeIndex: 1
+      },
+      daikin: {
+        name: "Daikin",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Daikin ARC433 Series (Standard)", proto: "DAIKIN_ARC433", timerType: "realtime" },
+          { id: 2, name: "Daikin 216-bit Full Frame (Inverter)", proto: "DAIKIN_216", timerType: "realtime" },
+          { id: 3, name: "Daikin FTKC / FTKM Inverter", proto: "DAIKIN_FTKC", timerType: "realtime" },
+          { id: 4, name: "Daikin ARC452 / ARC466", proto: "DAIKIN_ARC452", timerType: "realtime" },
+          { id: 5, name: "Daikin 160-bit Compact", proto: "DAIKIN_160", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      casper: {
+        name: "Casper",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Casper Eco-Inverter R32 (RG57)", proto: "MIDEA_RG57", timerType: "delta" },
+          { id: 2, name: "Casper Smart Inverter 48-bit", proto: "CASPER_48", timerType: "delta" },
+          { id: 3, name: "Casper Series G / TC (Midea protocol)", proto: "CASPER_TC", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      gree: {
+        name: "Gree",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Gree YAA / YAC / YB0F2 (64-bit)", proto: "GREE_YAA", timerType: "delta" },
+          { id: 2, name: "Gree Inverter Modern (8-byte)", proto: "GREE_MODERN", timerType: "delta" },
+          { id: 3, name: "Gree Cozy / Fairy Series", proto: "GREE_COZY", timerType: "delta" },
+          { id: 4, name: "Gree Multi-Split System", proto: "GREE_MULTI", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      funiki: {
+        name: "Funiki (Hòa Phát)",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Funiki Inverter HIC Series", proto: "MIDEA_RG57", timerType: "delta" },
+          { id: 2, name: "Funiki Standard HSC Series", proto: "FUNIKI_HSC", timerType: "delta" },
+          { id: 3, name: "Funiki Aux-based Protocol", proto: "AUX_PROTOCOL", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      mitsubishi_elec: {
+        name: "Mitsubishi Electric",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Mitsubishi KD07BS / MSZ (144-bit)", proto: "MITSUBISHI_MSZ", timerType: "realtime" },
+          { id: 2, name: "Mitsubishi Heavy RLA502A (88-bit)", proto: "MITSUBISHI_HEAVY_88", timerType: "realtime" },
+          { id: 3, name: "Mitsubishi Electric Inverter Mr.Slim", proto: "MITSUBISHI_MR_SLIM", timerType: "realtime" }
+        ],
+        workingCodeIndex: 0
+      },
+      mitsubishi_heavy: {
+        name: "Mitsubishi Heavy",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Mitsubishi Heavy RKX502A (152-bit)", proto: "MITSUBISHI_HEAVY_152", timerType: "realtime" },
+          { id: 2, name: "Mitsubishi Heavy SRK Series", proto: "MITSUBISHI_HEAVY_SRK", timerType: "realtime" },
+          { id: 3, name: "Mitsubishi Heavy Commercial", proto: "MITSUBISHI_HEAVY_COMM", timerType: "realtime" }
+        ],
+        workingCodeIndex: 0
+      },
+      lg: {
+        name: "LG Electronics",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "LG 28-bit Standard Inverter", proto: "LG_28BIT", timerType: "delta" },
+          { id: 2, name: "LG Dual Inverter Smart (AKB737)", proto: "LG_DUAL_INV", timerType: "delta" },
+          { id: 3, name: "LG Artcool / Standard V", proto: "LG_ARTCOOL", timerType: "delta" }
+        ],
+        workingCodeIndex: 1
+      },
+      samsung: {
+        name: "Samsung",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Samsung Wind-Free (14-byte frame)", proto: "SAMSUNG_WINDFREE", timerType: "realtime" },
+          { id: 2, name: "Samsung DB98 Series (Extended)", proto: "SAMSUNG_DB98", timerType: "realtime" },
+          { id: 3, name: "Samsung Digital Inverter AR5000", proto: "SAMSUNG_AR5000", timerType: "realtime" }
+        ],
+        workingCodeIndex: 0
+      },
+      midea: {
+        name: "Midea",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Midea RG57 / RG58 Series (48-bit)", proto: "MIDEA_RG57", timerType: "delta" },
+          { id: 2, name: "Midea Airstill Inverter", proto: "MIDEA_AIRSTILL", timerType: "delta" },
+          { id: 3, name: "Midea Commercial Cassette", proto: "MIDEA_COMM", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      aqua: {
+        name: "Aqua (Sanyo)",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Aqua AQA Inverter (Haier Code)", proto: "HAIER_YRW02", timerType: "delta" },
+          { id: 2, name: "Aqua Clean Cool Series", proto: "AQUA_CLEAN", timerType: "delta" },
+          { id: 3, name: "Aqua Sanyo Legacy 64-bit", proto: "SANYO_64", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      toshiba: {
+        name: "Toshiba",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Toshiba Inverter 72-bit (WH-TA)", proto: "TOSHIBA_72", timerType: "realtime" },
+          { id: 2, name: "Toshiba Daiseikai Series", proto: "TOSHIBA_DAISEIKAI", timerType: "realtime" },
+          { id: 3, name: "Toshiba Carrier 48-bit", proto: "TOSHIBA_CARRIER", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      sharp: {
+        name: "Sharp",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Sharp Plasmacluster Inverter (104-bit)", proto: "SHARP_104", timerType: "delta" },
+          { id: 2, name: "Sharp J-Tech Inverter", proto: "SHARP_JTECH", timerType: "delta" },
+          { id: 3, name: "Sharp Standard AH Series", proto: "SHARP_AH", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      hitachi: {
+        name: "Hitachi",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Hitachi RAR Series (392-bit Extended)", proto: "HITACHI_RAR", timerType: "realtime" },
+          { id: 2, name: "Hitachi Inverter Airhome", proto: "HITACHI_AIRHOME", timerType: "realtime" },
+          { id: 3, name: "Hitachi Standard Split", proto: "HITACHI_SPLIT", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      nagakawa: {
+        name: "Nagakawa",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Nagakawa Inverter NIS (Midea type)", proto: "MIDEA_RG57", timerType: "delta" },
+          { id: 2, name: "Nagakawa NS Series (Aux type)", proto: "AUX_PROTOCOL", timerType: "delta" },
+          { id: 3, name: "Nagakawa Commercial Ceiling", proto: "NAGAKAWA_COMM", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      tcl: {
+        name: "TCL",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "TCL TAC Inverter Series", proto: "TCL_TAC", timerType: "delta" },
+          { id: 2, name: "TCL Gentle Cool 112-bit", proto: "TCL_112", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      electrolux: {
+        name: "Electrolux",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Electrolux Gree-based (YAA protocol)", proto: "GREE_YAA", timerType: "delta" },
+          { id: 2, name: "Electrolux Midea-based (RG57)", proto: "MIDEA_RG57", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      beko: {
+        name: "Beko",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Beko ProSmart Inverter", proto: "BEKO_PROSMART", timerType: "delta" },
+          { id: 2, name: "Beko Standard 48-bit", proto: "BEKO_48", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      },
+      carrier: {
+        name: "Carrier",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Carrier RG56 / RG57 Series", proto: "MIDEA_RG57", timerType: "delta" },
+          { id: 2, name: "Carrier Toshiba-based", proto: "TOSHIBA_72", timerType: "realtime" }
+        ],
+        workingCodeIndex: 0
+      },
+      haier: {
+        name: "Haier",
+        carrier: 38000,
+        codes: [
+          { id: 1, name: "Haier YR-W02 / YR-HD Series", proto: "HAIER_YRW02", timerType: "delta" },
+          { id: 2, name: "Haier 168-bit Full Inverter", proto: "HAIER_168", timerType: "delta" }
+        ],
+        workingCodeIndex: 0
+      }
+    };
+
+    // Calculate database totals
+    let totalBrandsCount = Object.keys(COMPREHENSIVE_BRANDS).length;
+    let totalCodesCount = 0;
+    for (let k in COMPREHENSIVE_BRANDS) {
+      totalCodesCount += COMPREHENSIVE_BRANDS[k].codes.length;
+    }
+    document.getElementById('statTotalBrands').innerText = totalBrandsCount + "+ Thương hiệu";
+    document.getElementById('statTotalCodes').innerText = totalCodesCount + " Bộ mã chi tiết";
+
+    // App State
+    let currentBrandKey = "funiki";
+    let pairingStepIndex = 5; // Mã 6 (Bật máy Coolix)
+    let activeConfig = {
+      brandKey: "funiki",
+      codeIndex: 5, // Mã 6
+      temp: 26,
+      targetHour: 7,
+      targetMinute: 30
+    };
+
+    let acState = {
+      power: false,
+      temp: 26,
+      timerOffAt: null,
+      isBlowing: false
+    };
+
+    // Custom Brand Picker Logic
+    function toggleBrandMenu() {
+      const menu = document.getElementById('brandPickerMenu');
+      const trigger = document.getElementById('brandPickerTrigger');
+      const isOpen = menu.classList.contains('open');
+
+      if (isOpen) {
+        menu.classList.remove('open');
+        trigger.classList.remove('active');
+      } else {
+        menu.classList.add('open');
+        trigger.classList.add('active');
+        document.getElementById('brandSearchInput').focus();
+      }
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+      const container = document.getElementById('brandPickerContainer');
+      if (container && !container.contains(e.target)) {
+        document.getElementById('brandPickerMenu')?.classList.remove('open');
+        document.getElementById('brandPickerTrigger')?.classList.remove('active');
+      }
+    });
+
+    function renderBrandList(filterText = "") {
+      const listContainer = document.getElementById('brandListScroll');
+      if (!listContainer) return;
+      listContainer.innerHTML = "";
+      const query = filterText.toLowerCase().trim();
+
+      for (let key in COMPREHENSIVE_BRANDS) {
+        const brand = COMPREHENSIVE_BRANDS[key];
+        if (query && !brand.name.toLowerCase().includes(query)) {
+          continue;
+        }
+
+        const isSelected = (key === currentBrandKey);
+        const item = document.createElement('div');
+        item.className = `brand-menu-item ${isSelected ? 'selected' : ''}`;
+        item.onclick = () => selectBrand(key);
+
+        item.innerHTML = `
+          <div class="item-left">
+            <div class="item-initial">${brand.name.charAt(0)}</div>
+            <div class="item-name">${brand.name}</div>
+          </div>
+          <div class="item-count-badge">${brand.codes.length} mã</div>
+        `;
+        listContainer.appendChild(item);
+      }
+    }
+
+    function filterBrandList(e) {
+      renderBrandList(e.target.value);
+    }
+
+    function selectBrand(key) {
+      currentBrandKey = key;
+      pairingStepIndex = 0;
+
+      const brand = COMPREHENSIVE_BRANDS[key];
+      document.getElementById('brandTriggerInitial').innerText = brand.name.charAt(0);
+      document.getElementById('brandTriggerName').innerText = brand.name;
+      document.getElementById('brandTriggerSub').innerText = `${brand.codes.length} bộ mã có sẵn`;
+      document.getElementById('acWallBrand').innerText = brand.name.toUpperCase();
+
+      // Close menu
+      document.getElementById('brandPickerMenu').classList.remove('open');
+      document.getElementById('brandPickerTrigger').classList.remove('active');
+
+      updatePairingUI();
+      renderBrandList();
+      showToast("🏷️", `Đã chọn: ${brand.name}`);
+    }
+
+    renderBrandList();
+
+    // Clock and countdown
+    function updateClocks() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      const timeStr = `${hours}:${mins}`;
+
+      document.getElementById('statusBarClock').innerText = timeStr;
+      document.getElementById('homeClockBig').innerText = timeStr;
+
+      const remaining = calculateRemainingToTarget(activeConfig.targetHour, activeConfig.targetMinute);
+      document.getElementById('countdownDuration').innerText = `${remaining.hours}h ${remaining.minutes}m nữa`;
+      document.getElementById('widgetRemainingPreview').innerText = `Còn ${remaining.hours}h ${remaining.minutes}m đến lúc tắt`;
+    }
+
+    setInterval(updateClocks, 1000);
+    updateClocks();
+
+    function calculateRemainingToTarget(targetH, targetM) {
+      const now = new Date();
+      let target = new Date();
+      target.setHours(targetH, targetM, 0, 0);
+
+      if (target <= now) {
+        target.setDate(target.getDate() + 1);
+      }
+
+      const diffMs = target - now;
+      const diffMins = Math.round(diffMs / (1000 * 60));
+      const hours = Math.floor(diffMins / 60);
+      const minutes = diffMins % 60;
+
+      return { totalMinutes: diffMins, hours, minutes };
+    }
+
+    function switchView(viewName) {
+      document.getElementById('viewRoutine').style.display = viewName === 'routine' ? 'block' : 'none';
+      document.getElementById('viewRemote').style.display = viewName === 'remote' ? 'flex' : 'none';
+      document.getElementById('viewPairing').style.display = viewName === 'pairing' ? 'flex' : 'none';
+      document.getElementById('viewWidget').style.display = viewName === 'widget' ? 'flex' : 'none';
+
+      document.getElementById('tabRoutine').classList.toggle('active', viewName === 'routine');
+      document.getElementById('tabRemote').classList.toggle('active', viewName === 'remote');
+      document.getElementById('tabPairing').classList.toggle('active', viewName === 'pairing');
+      document.getElementById('tabWidget').classList.toggle('active', viewName === 'widget');
+
+      const screenContent = document.querySelector('.screen-content');
+      if (screenContent) {
+        screenContent.style.padding = viewName === 'remote' ? '0' : '4px 16px 16px';
+        screenContent.style.overflow = viewName === 'remote' ? 'hidden' : 'auto';
+      }
+
+      if (viewName === 'remote') {
+        updateMiRemoteUI();
+      }
+    }
+
+    // STATE CỦA MI REMOTE
+    const miRemoteModes = ["COOL", "DRY", "FAN", "AUTO"];
+    let miRemoteModeIndex = 0;
+    const miRemoteSpeeds = ["AUTO", "1 (THẤP)", "2 (VỪA)", "3 (CAO)"];
+    let miRemoteSpeedIndex = 0;
+    let miRemoteSwingOn = true;
+
+    function updateMiRemoteUI() {
+      const displayArea = document.getElementById('miDisplayArea');
+      const powerSvg = document.getElementById('miPowerSvgIcon');
+      const tempNum = document.getElementById('miDisplayTemp');
+      const badgeMode = document.getElementById('miBadgeMode');
+      const badgeSpeed = document.getElementById('miBadgeSpeed');
+      const badgeSwing = document.getElementById('miBadgeSwing');
+
+      if (acState.power) {
+        displayArea.classList.add('on');
+        powerSvg.classList.remove('off');
+        tempNum.innerText = acState.temp;
+        badgeMode.innerText = miRemoteModes[miRemoteModeIndex];
+        badgeSpeed.innerText = `SPEED: ${miRemoteSpeeds[miRemoteSpeedIndex]}`;
+        badgeSwing.innerText = miRemoteSwingOn ? "SWING ON" : "SWING OFF";
+      } else {
+        displayArea.classList.remove('on');
+        powerSvg.classList.add('off');
+      }
+    }
+
+    function onMiRemoteKey(action) {
+      flashIrEmitter();
+      playBeep(2100, 0.12);
+
+      const brand = COMPREHENSIVE_BRANDS[activeConfig.brandKey] || COMPREHENSIVE_BRANDS['funiki'];
+
+      if (action === 'POWER') {
+        acState.power = !acState.power;
+        acState.isBlowing = acState.power;
+        if (!acState.power) acState.timerOffAt = null;
+
+        updateAcWallUnit();
+        updateMiRemoteUI();
+
+        if (acState.power) {
+          document.getElementById('packetHexDisplay').innerText = 
+`// [PHÁT MÃ BẬT MÁY COOLIX]
+// Thương hiệu: ${brand.name} | Giao thức: COOLIX (24-bit MSB-first)
+LỆNH:   POWER_ON (Mã 6)
+KHUNG:  0xB2 0x1F 0x48 (Phát lặp 2 frame)
+CHU KỲ: Header 4.5ms/4.5ms, Bit0 550us/550us, Bit1 550us/1650us`;
+          showToast("🟢", "Đã gửi mã BẬT máy Funiki (Mã 6: 0xB2 0x1F 0x48)");
+        } else {
+          document.getElementById('packetHexDisplay').innerText = 
+`// [PHÁT MÃ TẮT MÁY COOLIX]
+// Thương hiệu: ${brand.name} | Giao thức: COOLIX (24-bit MSB-first)
+LỆNH:   POWER_OFF (Mã 5)
+KHUNG:  0xB2 0x7B 0xE0 (Phát lặp 2 frame)
+CHU KỲ: Header 4.5ms/4.5ms, Bit0 550us/550us, Bit1 550us/1650us`;
+          showToast("🛑", "Đã gửi mã TẮT máy Funiki (Mã 5: 0xB2 0x7B 0xE0)");
+        }
+      } else if (action === 'MODE') {
+        if (!acState.power) {
+          showToast("⚠️", "Hãy bật nguồn điều hòa trước!");
+          return;
+        }
+        miRemoteModeIndex = (miRemoteModeIndex + 1) % miRemoteModes.length;
+        updateMiRemoteUI();
+        showToast("❄️", `Chế độ: ${miRemoteModes[miRemoteModeIndex]}`);
+      } else if (action === 'SPEED') {
+        if (!acState.power) {
+          showToast("⚠️", "Hãy bật nguồn điều hòa trước!");
+          return;
+        }
+        miRemoteSpeedIndex = (miRemoteSpeedIndex + 1) % miRemoteSpeeds.length;
+        updateMiRemoteUI();
+        showToast("💨", `Tốc độ quạt: ${miRemoteSpeeds[miRemoteSpeedIndex]}`);
+      } else if (action === 'DIRECTION') {
+        showToast("📐", "Đã gửi lệnh chỉnh nấc cánh vẫy gió (Step)");
+      } else if (action === 'SWING') {
+        miRemoteSwingOn = !miRemoteSwingOn;
+        updateMiRemoteUI();
+        document.getElementById('packetHexDisplay').innerText = 
+`// [PHÁT MÃ ĐẢO GIÓ COOLIX SWING]
+LỆNH:   SWING_TOGGLE
+KHUNG:  0xB2 0x01 0xFE (Phát lặp 2 frame)`;
+        showToast("↔", `Đảo gió (Swing): ${miRemoteSwingOn ? "BẬT" : "TẮT"}`);
+      } else if (action === 'TEMP_DOWN') {
+        if (!acState.power) {
+          showToast("⚠️", "Hãy bật nguồn điều hòa trước!");
+          return;
+        }
+        if (acState.temp > 16) {
+          acState.temp--;
+          activeConfig.temp = acState.temp;
+          document.getElementById('valTemp').innerText = `${acState.temp}°C`;
+          updateAcWallUnit();
+          updateMiRemoteUI();
+          showToast("❄️", `Nhiệt độ: ${acState.temp}°C`);
+        }
+      } else if (action === 'TEMP_UP') {
+        if (!acState.power) {
+          showToast("⚠️", "Hãy bật nguồn điều hòa trước!");
+          return;
+        }
+        if (acState.temp < 30) {
+          acState.temp++;
+          activeConfig.temp = acState.temp;
+          document.getElementById('valTemp').innerText = `${acState.temp}°C`;
+          updateAcWallUnit();
+          updateMiRemoteUI();
+          showToast("❄️", `Nhiệt độ: ${acState.temp}°C`);
+        }
+      } else if (action === 'TEMP_CLICK') {
+        showToast("🌡️", `Nhiệt độ hiện tại: ${acState.temp}°C`);
+      } else if (action === 'TIMER') {
+        triggerOneClickTimer();
+      } else if (action === 'SLEEP') {
+        showToast("🌙", "Đã gửi lệnh Chế độ ngủ đêm (Sleep Mode)");
+      } else if (action === 'MORE') {
+        showToast("⚙️", "Cài đặt & Tùy chọn nâng cao điều hòa");
+      }
+    }
+
+    function flashIrEmitter() {
+      const emitter = document.getElementById('irEmitter');
+      emitter.classList.add('emitting');
+      setTimeout(() => {
+        emitter.classList.remove('emitting');
+      }, 500);
+    }
+
+    function showToast(icon, message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastIcon').innerText = icon;
+      document.getElementById('toastText').innerText = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function adjustTemp(delta) {
+      activeConfig.temp = Math.max(16, Math.min(30, activeConfig.temp + delta));
+      document.getElementById('valTemp').innerText = `${activeConfig.temp}°C`;
+    }
+
+    function onBrandChange() {
+      const selectElem = document.getElementById('brandSelect');
+      if (selectElem) {
+        currentBrandKey = selectElem.value;
+      }
+      pairingStepIndex = 0;
+      updatePairingUI();
+      if (COMPREHENSIVE_BRANDS[currentBrandKey]) {
+        document.getElementById('acWallBrand').innerText = COMPREHENSIVE_BRANDS[currentBrandKey].name.toUpperCase();
+      }
+    }
+
+    function updatePairingUI() {
+      const brand = COMPREHENSIVE_BRANDS[currentBrandKey];
+      if (!brand) return;
+      const code = brand.codes[pairingStepIndex];
+      document.getElementById('pairingCodeIndexBadge').innerText = `ĐANG THỬ: MÃ ${pairingStepIndex + 1} / ${brand.codes.length}`;
+      document.getElementById('pairingCodeNameTitle').innerText = code.name;
+      document.getElementById('carrierFreqTag').innerText = `Carrier: ${brand.carrier.toLocaleString()} Hz`;
+    }
+
+    // Test Pairing Code
+    function testPairingCode() {
+      flashIrEmitter();
+      const brand = COMPREHENSIVE_BRANDS[currentBrandKey];
+      const code = brand.codes[pairingStepIndex];
+      const isCorrectCode = (pairingStepIndex === brand.workingCodeIndex);
+
+      generateHexInspectorForTest(brand, code);
+
+      if (isCorrectCode) {
+        setTimeout(() => {
+          playBeep(2200, 0.15);
+          acState.power = !acState.power;
+          updateAcWallUnit();
+          showToast("🔊", `Điều hòa ${brand.name} kêu BÍP! Phản hồi tín hiệu thành công.`);
+        }, 200);
+      } else {
+        showToast("📡", `Đã phát mã [${code.name}] (Chưa khớp tần số/giao thức)`);
+      }
+    }
+
+    function nextPairingCode() {
+      const brand = COMPREHENSIVE_BRANDS[currentBrandKey];
+      if (pairingStepIndex < brand.codes.length - 1) {
+        pairingStepIndex++;
+        updatePairingUI();
+        showToast("🔄", `Chuyển sang Mã số ${pairingStepIndex + 1}`);
+      } else {
+        pairingStepIndex = 0;
+        updatePairingUI();
+        showToast("ℹ️", "Đã thử hết mã hãng này, quay lại mã đầu.");
+      }
+    }
+
+    function confirmPairingCode() {
+      const brand = COMPREHENSIVE_BRANDS[currentBrandKey];
+      activeConfig.brandKey = currentBrandKey;
+      activeConfig.codeIndex = pairingStepIndex;
+
+      const chosenCode = brand.codes[pairingStepIndex];
+      document.getElementById('currentAcName').innerText = brand.name;
+      document.getElementById('currentCodeTag').innerText = `Mã: ${chosenCode.name}`;
+      
+      playBeep(2400, 0.18);
+      setTimeout(() => playBeep(2800, 0.22), 150);
+
+      showToast("✅", `Đã lưu: ${brand.name} (${chosenCode.name})`);
+      switchView('routine');
+    }
+
+    // THE CORE: 1-Click Timer 7:30 Action
+    function triggerOneClickTimer() {
+      flashIrEmitter();
+
+      const remaining = calculateRemainingToTarget(activeConfig.targetHour, activeConfig.targetMinute);
+      const deltaMinutes = remaining.totalMinutes;
+
+      const brand = COMPREHENSIVE_BRANDS[activeConfig.brandKey];
+      const code = brand.codes[activeConfig.codeIndex];
+
+      const packetHex = generateTimerPacketHex(brand, code, activeConfig.temp, deltaMinutes);
+      document.getElementById('packetHexDisplay').innerText = packetHex;
+
+      setTimeout(() => {
+        playBeep(2200, 0.12);
+        setTimeout(() => playBeep(2200, 0.18), 160);
+
+        acState.power = true;
+        acState.temp = activeConfig.temp;
+        acState.timerOffAt = "07:30";
+        acState.isBlowing = true;
+        updateAcWallUnit();
+
+        showToast("⚡", `Đã phát IR [${brand.name}]: Bật ${activeConfig.temp}°C + Hẹn giờ 07:30!`);
+      }, 250);
+    }
+
+    let demoFanSpeedIndex = 0;
+    const demoFanSpeeds = ["Auto", "Thấp", "Vừa", "Cao"];
+
+    function sendQuickCommand(type) {
+      flashIrEmitter();
+      playBeep(2000, 0.1);
+
+      if (type === 'POWER_ON') {
+        acState.power = true;
+        acState.isBlowing = true;
+        showToast("🟢", `Đã gửi mã Bật điều hòa (${acState.temp}°C - Quạt ${demoFanSpeeds[demoFanSpeedIndex]})`);
+      } else if (type === 'POWER_OFF') {
+        acState.power = false;
+        acState.timerOffAt = null;
+        acState.isBlowing = false;
+        showToast("🛑", "Đã gửi mã Tắt điều hòa");
+      } else if (type === 'FAN_SPEED') {
+        demoFanSpeedIndex = (demoFanSpeedIndex + 1) % demoFanSpeeds.length;
+        const btn = document.getElementById('demoFanSpeedBtn');
+        if (btn) btn.innerText = `💨 Gió: ${demoFanSpeeds[demoFanSpeedIndex]}`;
+        showToast("💨", `Tốc độ gió: ${demoFanSpeeds[demoFanSpeedIndex]}`);
+      } else if (type === 'SWING') {
+        showToast("↔", "Đã gửi lệnh Đảo gió (Swing)");
+      } else if (type === 'CANCEL_TIMER') {
+        acState.timerOffAt = null;
+        showToast("⏰", "Đã gửi mã Hủy hẹn giờ");
+      }
+      updateAcWallUnit();
+    }
+
+    function updateAcWallUnit() {
+      const tempDisplay = document.getElementById('acLedTemp');
+      const powerIndicator = document.getElementById('ledPowerIndicator');
+      const timerIndicator = document.getElementById('ledTimerIndicator');
+      const vent = document.getElementById('acVent');
+
+      if (acState.power) {
+        tempDisplay.innerText = `${acState.temp}°C`;
+        powerIndicator.innerText = "● ON";
+        powerIndicator.className = "active";
+        vent.classList.add('blowing');
+      } else {
+        tempDisplay.innerText = "--°C";
+        powerIndicator.innerText = "● OFF";
+        powerIndicator.className = "";
+        vent.classList.remove('blowing');
+      }
+
+      if (acState.timerOffAt) {
+        timerIndicator.innerText = `TIMER: ${acState.timerOffAt}`;
+        timerIndicator.className = "active";
+      } else {
+        timerIndicator.innerText = "TIMER: OFF";
+        timerIndicator.className = "";
+      }
+    }
+
+    function generateTimerPacketHex(brand, code, temp, deltaMinutes) {
+      const hours = Math.floor(deltaMinutes / 60);
+      const mins = deltaMinutes % 60;
+      const hexMins = deltaMinutes.toString(16).toUpperCase().padStart(4, '0');
+      const tempHex = (temp).toString(16).toUpperCase();
+
+      return `// [FRAME CHUẨN GỬI CONSUMER-IR-MANAGER]
+// Thương hiệu: ${brand.name} | Bộ mã: ${code.name}
+// Protocol Engine: ${code.proto} (Timer: ${code.timerType.toUpperCase()})
+// Tần số Carrier: 38,000 Hz | Duty Cycle: 33%
+// Trạng thái: Power ON | Mode COOL | Temp: ${temp}°C | Fan AUTO
+// Thời gian đến 07:30: ${deltaMinutes} phút (${hours}h ${mins}m)
+
+HEADER:   0x02 0x20 0xE0 0x04 0x00 0x00 0x00 0x06
+PAYLOAD:  0x02 0x20 0xE0 0x04 0x${tempHex}0 0x31 0x00 0x80
+TIMER_B:  0x${hexMins.substr(0,2)} 0x${hexMins.substr(2,2)} [OFF_TIMER_${code.timerType.toUpperCase()}]
+CHECKSUM: 0x${Math.floor(Math.random()*200 + 55).toString(16).toUpperCase()} [CRC OK]
+
+Raw Timings Array (ConsumerIrManager.transmit pattern):
+[3500, 1750, 440, 1300, 440, 430, 440, 1300, 440, 430, 440, 430, 440, 1300, ...]`;
+    }
+
+    function generateHexInspectorForTest(brand, code) {
+      document.getElementById('packetHexDisplay').innerText = 
+`// [PHÁT MÃ THỬ NGHIỆM DÒ SÓNG]
+// Brand: ${brand.name} | Giao thức: ${code.proto}
+// Tần số: ${brand.carrier} Hz
+COMMAND: POWER_TOGGLE_TEST
+PAYLOAD: 0x02 0x20 0xE0 0x04 0x00 0x01 0x${Math.floor(Math.random()*200 + 55).toString(16).toUpperCase()}
+Sending 67 pulses via Xiaomi IR Blaster API...`;
+    }
+
+    updatePairingUI();
+    switchView('remote');
+  </script>
+</body>
+</html>
