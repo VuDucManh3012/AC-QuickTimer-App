@@ -37,33 +37,22 @@ public class AcProtocolDatabase {
 
     static {
         // =========================================================================
-        // 1. FUNIKI (HÒA PHÁT) - 10 BỘ MÃ (CHUẨN COOLIX & MI REMOTE)
+        // 1. FUNIKI (HÒA PHÁT) - MỖI MÃ LÀ 1 BỘ REMOTE ĐẦY ĐỦ NÚT (NHƯ MI REMOTE)
         // =========================================================================
         BrandData funiki = new BrandData("funiki", "Funiki (Hòa Phát)", 38000);
 
-        // Mã 1-3: Chuẩn tuyệt đối dòng remote RG10B(E)/BGEF
-        funiki.codes.add(new CodeProfile(1, "Funiki Mã 1 (Chuẩn Remote RG10B - Bật/Tắt Power)", "MIDEA_RG10_POWER"));
-        funiki.codes.add(new CodeProfile(2, "Funiki Mã 2 (Chuẩn Remote RG10B - Làm Lạnh Cool 26°C)", "MIDEA_RG10_COOL26"));
-        funiki.codes.add(new CodeProfile(3, "Funiki Mã 3 (Chuẩn Remote RG10B - Làm Lạnh Cool 25°C)", "MIDEA_RG10_COOL25"));
-
-        // Mã 4: Mã số 4 trong Mi Remote Xiaomi
-        funiki.codes.add(new CodeProfile(4, "Funiki Mã 4 (Mi Remote Bộ Mã 4 - Coolix 0xB2 0x4D 0xBF)", "COOLIX_4D_MSB"));
-
-        // ⭐ Mã 5 & 6: ĐÃ KIỂM CHỨNG KÊU BÍP VÀ ĐIỀU KHIỂN ĐƯỢC ĐIỀU HÒA
-        funiki.codes.add(new CodeProfile(5, "Funiki Mã 5 (Lệnh Tắt Máy - Coolix 0xB2 0x7B 0xE0)", "COOLIX_7B_MSB"));
-        funiki.codes.add(new CodeProfile(6, "Funiki Mã 6 (Lệnh Bật Máy - Coolix 0xB2 0x1F 0x48)", "COOLIX_1F_MSB"));
-        funiki.codes.add(new CodeProfile(7, "Funiki Mã 7 (Mi Remote Bộ Mã 3 - Coolix 0xB2 0xDF 0x20)", "COOLIX_DF_MSB"));
-
-        // Mã 8-10: Các hệ bo mạch khác (Midea Classic, AUX, Gree)
-        funiki.codes.add(new CodeProfile(8, "Funiki Mã 8 (Midea 48-bit Classic 0xA1 0x82 0x6F)", "MIDEA_CLASSIC_48"));
-        funiki.codes.add(new CodeProfile(9, "Funiki Mã 9 (Funiki Bo Mạch AUX 0xC3)", "AUX_C3"));
-        funiki.codes.add(new CodeProfile(10, "Funiki Mã 10 (Funiki Bo Mạch Gree 64-bit)", "GREE_64"));
+        // ⭐ Mã 1: Coolix 24-bit - lệnh Bật/Tắt đã kiểm chứng trên máy thật, đủ mọi nút (CoolixEncoder)
+        funiki.codes.add(new CodeProfile(1, "Funiki Mã 1 - Coolix 24-bit (đủ nút, đã kiểm chứng)", "COOLIX"));
+        funiki.codes.add(new CodeProfile(2, "Funiki Mã 2 - Midea RG10B 48-bit", "MIDEA_RG10_POWER"));
+        funiki.codes.add(new CodeProfile(3, "Funiki Mã 3 - Midea 48-bit Classic", "MIDEA_CLASSIC_48"));
+        funiki.codes.add(new CodeProfile(4, "Funiki Mã 4 - Bo mạch AUX", "AUX_C3"));
+        funiki.codes.add(new CodeProfile(5, "Funiki Mã 5 - Bo mạch Gree 64-bit", "GREE_64"));
 
         BRANDS.put("funiki", funiki);
 
         // 2. CASPER
         BrandData casper = new BrandData("casper", "Casper", 38000);
-        casper.codes.add(new CodeProfile(1, "Casper Coolix", "COOLIX_1F_MSB"));
+        casper.codes.add(new CodeProfile(1, "Casper Coolix", "COOLIX"));
         casper.codes.add(new CodeProfile(2, "Casper Midea/RG10", "MIDEA_RG10_POWER"));
         BRANDS.put("casper", casper);
 
@@ -84,19 +73,9 @@ public class AcProtocolDatabase {
     public static int[] buildPowerTogglePattern(BrandData brand, CodeProfile profile) {
         String proto = profile.proto;
         switch (proto) {
-            case "COOLIX_1F_MSB":
-                // ⭐ Mã 6: Lệnh BẬT MÁY Coolix đã kiểm chứng kêu BÍP và BẬT thành công!
-                return encodeCoolixMsb((byte) 0xB2, (byte) 0x1F, (byte) 0x48);
-
-            case "COOLIX_7B_MSB":
-                // ⭐ Mã 5: Lệnh TẮT MÁY Coolix đã kiểm chứng kêu BÍP và TẮT thành công!
-                return encodeCoolixMsb((byte) 0xB2, (byte) 0x7B, (byte) 0xE0);
-
-            case "COOLIX_4D_MSB":
-                return encodeCoolixMsb((byte) 0xB2, (byte) 0x4D, (byte) 0xBF);
-
-            case "COOLIX_DF_MSB":
-                return encodeCoolixMsb((byte) 0xB2, (byte) 0xDF, (byte) 0x20);
+            case "COOLIX":
+                // ⭐ Khung BẬT đã kiểm chứng kêu BÍP trên máy thật (AUTO 24°C = 0xB21F48)
+                return CoolixEncoder.pattern(CoolixEncoder.encodeState("AUTO", 24, 0));
 
             case "MIDEA_RG10_POWER":
                 return encodeMidea48((byte) 0xA1, (byte) 0x9C, (byte) 0x5E, (byte) 0xFF, (byte) 0xFF, (byte) 0x53);
@@ -131,8 +110,8 @@ public class AcProtocolDatabase {
      * PHÁT MÃ TẮT NGUỒN (POWER OFF)
      */
     public static int[] buildPowerOffPattern(BrandData brand, CodeProfile profile) {
-        if ("funiki".equals(brand.key) || profile.proto.startsWith("COOLIX")) {
-            // ⭐ Lệnh Tắt điều hòa Coolix chuẩn (Mã 5: 0xB2 0x7B 0xE0) - ĐÃ KIỂM CHỨNG TẮT THÀNH CÔNG!
+        if (isCoolix(profile)) {
+            // ⭐ Lệnh Off cố định của Coolix (0xB2 0x7B 0xE0 = CoolixEncoder.CMD_OFF) - ĐÃ KIỂM CHỨNG TẮT THÀNH CÔNG!
             return encodeCoolixMsb((byte) 0xB2, (byte) 0x7B, (byte) 0xE0);
         }
         if (profile.proto.startsWith("MIDEA")) {
@@ -141,13 +120,23 @@ public class AcProtocolDatabase {
         return buildPowerTogglePattern(brand, profile);
     }
 
+    public static boolean isCoolix(CodeProfile profile) {
+        return profile.proto.startsWith("COOLIX");
+    }
+
     /**
-     * PHÁT MÃ BẬT NGUỒN (POWER ON)
+     * PHÁT MÃ BẬT NGUỒN (POWER ON) - mặc định chế độ COOL
      */
     public static int[] buildPowerOnPattern(BrandData brand, CodeProfile profile, int temp, int fanSpeed) {
-        if ("funiki".equals(brand.key) || profile.proto.startsWith("COOLIX")) {
-            // ⭐ Lệnh Bật điều hòa Coolix chuẩn (Mã 6: 0xB2 0x1F 0x48) - ĐÃ KIỂM CHỨNG BẬT THÀNH CÔNG!
-            return encodeCoolixMsb((byte) 0xB2, (byte) 0x1F, (byte) 0x48);
+        return buildPowerOnPattern(brand, profile, "COOL", temp, fanSpeed);
+    }
+
+    /**
+     * PHÁT MÃ BẬT / CẬP NHẬT TRẠNG THÁI (chế độ + nhiệt độ + quạt)
+     */
+    public static int[] buildPowerOnPattern(BrandData brand, CodeProfile profile, String mode, int temp, int fanSpeed) {
+        if (isCoolix(profile)) {
+            return CoolixEncoder.pattern(CoolixEncoder.encodeState(mode, temp, fanSpeed));
         }
         if (profile.proto.startsWith("MIDEA")) {
             byte b5 = (byte) 0xA1;
@@ -171,8 +160,8 @@ public class AcProtocolDatabase {
      * PHÁT MÃ ĐẢO GIÓ (SWING VANE TOGGLE)
      */
     public static int[] buildSwingPattern(BrandData brand, CodeProfile profile) {
-        if ("funiki".equals(brand.key) || profile.proto.startsWith("COOLIX")) {
-            return encodeCoolixMsb((byte) 0xB2, (byte) 0x01, (byte) 0xFE);
+        if (isCoolix(profile)) {
+            return CoolixEncoder.pattern(CoolixEncoder.CMD_SWING);
         }
         if (profile.proto.startsWith("MIDEA")) {
             byte b5 = (byte) 0xA2;
@@ -183,16 +172,25 @@ public class AcProtocolDatabase {
             byte b0 = (byte) 0x7C;
             return encodeMidea48(b5, b4, b3, b2, b1, b0);
         }
-        return encodeCoolixMsb((byte) 0xB2, (byte) 0x01, (byte) 0xFE);
+        return CoolixEncoder.pattern(CoolixEncoder.CMD_SWING);
+    }
+
+    // Khoảng nghỉ giữa 2 lệnh IR liên tiếp (Bật → Hẹn giờ) để máy lạnh kịp xử lý lệnh trước
+    public static final int COMMAND_GAP_MS = 1000;
+
+    /**
+     * LỆNH HẸN GIỜ TẮT - mặc định chế độ COOL (widget)
+     */
+    public static int[] buildTimerPattern(BrandData brand, CodeProfile profile, int temp, int deltaMinutes) {
+        return buildTimerPattern(brand, profile, "COOL", temp, deltaMinutes);
     }
 
     /**
-     * LỆNH HẸN GIỜ TẮT:
-     * Dòng Funiki Coolix sử dụng khung sóng Coolix-48 chính xác
+     * LỆNH HẸN GIỜ TẮT: Coolix dùng khung COOLIX48 mang kèm nhiệt độ + chế độ đang chạy
      */
-    public static int[] buildTimerPattern(BrandData brand, CodeProfile profile, int temp, int deltaMinutes) {
-        if ("funiki".equals(brand.key) || profile.proto.startsWith("COOLIX")) {
-            return buildCoolixOffTimerPattern(deltaMinutes);
+    public static int[] buildTimerPattern(BrandData brand, CodeProfile profile, String mode, int temp, int deltaMinutes) {
+        if (isCoolix(profile)) {
+            return encodeCoolix48(CoolixEncoder.offTimerFrame(mode, temp, deltaMinutes));
         }
 
         // Midea RG10 (dòng khác)
@@ -212,48 +210,15 @@ public class AcProtocolDatabase {
     /**
      * LỆNH HỦY HẸN GIỜ (CANCEL TIMER)
      */
-    public static int[] buildCancelTimerPattern(BrandData brand, CodeProfile profile) {
-        if ("funiki".equals(brand.key) || profile.proto.startsWith("COOLIX")) {
-            return encodeCoolixMsb((byte) 0xB2, (byte) 0xC5, (byte) 0x3A);
+    public static int[] buildCancelTimerPattern(BrandData brand, CodeProfile profile, String mode, int temp, int fanSpeed) {
+        if (isCoolix(profile)) {
+            // Remote Coolix thật hủy hẹn giờ bằng cách phát lại khung trạng thái 24-bit thường
+            return CoolixEncoder.pattern(CoolixEncoder.encodeState(mode, temp, fanSpeed));
         }
         if (profile.proto.startsWith("MIDEA")) {
             return encodeMidea48((byte) 0xA1, (byte) 0xA0, (byte) 0x49, (byte) 0xFF, (byte) 0xFF, (byte) 0x67);
         }
         return encodeCoolixMsb((byte) 0xB2, (byte) 0xC5, (byte) 0x3A);
-    }
-
-    /**
-     * CÔNG THỨC MÃ HÓA HẸN GIỜ TẮT CHUẨN COOLIX-48 TỪ 0.5H ĐẾN 24H
-     */
-    public static int[] buildCoolixOffTimerPattern(int deltaMinutes) {
-        int halfhours = (int) Math.round(deltaMinutes / 30.0);
-        if (halfhours < 1) halfhours = 1;
-        if (halfhours > 48) halfhours = 48;
-
-        int b3, b2, b1, b0;
-        if (halfhours <= 16) { // 0.5h đến 8.0h
-            int idx = halfhours - 2;
-            if (idx < 0) idx = 0;
-            b3 = (0xA3 + idx * 2) & 0xFF;
-            b2 = 0xFF ^ b3;
-            b1 = 0x6C;
-            b0 = 0x7F;
-        } else if (halfhours <= 32) { // 8.5h đến 16.0h
-            int idx = halfhours - 17;
-            b3 = (0xA1 + idx * 2) & 0xFF;
-            b2 = 0xFF ^ b3;
-            b1 = 0x6D;
-            b0 = 0x7F;
-        } else { // 16.5h đến 24.0h
-            int idx = halfhours - 33;
-            b3 = (0xA1 + idx * 2) & 0xFF;
-            b2 = 0xFF ^ b3;
-            b1 = 0x6E;
-            b0 = 0x7F;
-        }
-
-        byte[] frame = new byte[]{(byte) 0xB2, (byte) 0x4D, (byte) b3, (byte) b2, (byte) b1, (byte) b0};
-        return encodeCoolix48(frame);
     }
 
     /**

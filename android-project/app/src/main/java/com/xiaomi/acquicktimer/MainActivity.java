@@ -45,11 +45,12 @@ public class MainActivity extends AppCompatActivity {
     private Button btnPairNoNext, btnPairYesConfirm, btnAutoScan;
 
     // View 4 (Mi Remote)
-    private TextView miBtnBack, miHeaderIcon, miTvOffLabel, miTvDisplayTemp, miBadgeMode, miBadgeSpeed, miBadgeSwing;
-    private LinearLayout miLayoutOnDisplay;
-    private FrameLayout miDisplayArea, miBtnPower;
-    private android.widget.ImageView miIvPowerIcon;
+    private TextView miTvDisplayTemp, miTvUnit, miTvMode, miTvStatusSpeed, miTvStatusSwing;
+    private LinearLayout miStatusRow, miExtraRow;
+    private FrameLayout miBtnPower;
+    private ImageView miIvPowerIcon;
     private Button miBtnMode, miBtnSpeed, miBtnDirection, miBtnSwing, miBtnTempDown, miBtnTempClick, miBtnTempUp, miBtnTimer, miBtnSleep, miBtnMore;
+    private Button miBtnTurbo, miBtnLed, miBtnClean;
 
     // State
     private String currentSelectedBrandKey = "funiki";
@@ -62,8 +63,11 @@ public class MainActivity extends AppCompatActivity {
     // Mi Remote State
     private boolean isAcOn = false;
     private int miModeIndex = 0;
-    private static final String[] MI_MODES = {"COOL", "DRY", "FAN", "AUTO"};
-    private boolean isSwingOn = true;
+    // Thứ tự chế độ/quạt khớp CoolixEncoder
+    private static final String[] MI_MODES = {"COOL", "HEAT", "DRY", "FAN", "AUTO"};
+    private static final String[] MI_MODE_LABELS = {"❄ Cooling", "☀ Heating", "≈ Dry", "✣ Fan", "Ⓐ Auto"};
+    private static final String[] MI_SPEED_LABELS = {"Auto", "Low", "Medium", "High"};
+    private boolean isSwingOn = false;
 
     private final Handler autoScanHandler = new Handler(Looper.getMainLooper());
     private final Runnable autoScanRunnable = new Runnable() {
@@ -92,18 +96,18 @@ public class MainActivity extends AppCompatActivity {
         irTransmitter = new IrTransmitter(this);
         prefs = getSharedPreferences("ac_prefs", Context.MODE_PRIVATE);
 
-        // Tự động chuyển cấu hình sang Funiki Mã 6 (đã kiểm chứng) nếu chưa thiết lập hoặc đang lưu Panasonic cũ
-        if (!prefs.contains("funiki_configured_v3") || "panasonic".equals(prefs.getString("brand_key", ""))) {
+        // Chuyển cấu hình sang Funiki Mã 1 (bộ mã Coolix đã kiểm chứng) nếu chưa thiết lập theo danh sách mã mới
+        if (!prefs.contains("funiki_configured_v4") || "panasonic".equals(prefs.getString("brand_key", ""))) {
             prefs.edit()
                     .putString("brand_key", "funiki")
-                    .putInt("code_id", 6)
-                    .putBoolean("funiki_configured_v3", true)
+                    .putInt("code_id", 1)
+                    .putBoolean("funiki_configured_v4", true)
                     .apply();
         }
 
-        currentTemp = prefs.getInt("temp", 26);
+        currentTemp = Math.max(CoolixEncoder.TEMP_MIN, prefs.getInt("temp", 26));
         currentSelectedBrandKey = prefs.getString("brand_key", "funiki");
-        pairingStepIndex = 5; // Mặc định trỏ sẵn vào Mã 6 (Lệnh Bật Máy Coolix)
+        pairingStepIndex = 0; // Mã 1 (Coolix)
 
         initViews();
         setupTabs();
@@ -124,15 +128,16 @@ public class MainActivity extends AppCompatActivity {
         viewWidget = findViewById(R.id.view_widget);
 
         // View 4 (Mi Remote)
-        miBtnBack = findViewById(R.id.mi_btn_back);
-        miHeaderIcon = findViewById(R.id.mi_header_icon);
-        miDisplayArea = findViewById(R.id.mi_display_area);
-        miTvOffLabel = findViewById(R.id.mi_tv_off_label);
-        miLayoutOnDisplay = findViewById(R.id.mi_layout_on_display);
         miTvDisplayTemp = findViewById(R.id.mi_tv_display_temp);
-        miBadgeMode = findViewById(R.id.mi_badge_mode);
-        miBadgeSpeed = findViewById(R.id.mi_badge_speed);
-        miBadgeSwing = findViewById(R.id.mi_badge_swing);
+        miTvUnit = findViewById(R.id.mi_tv_unit);
+        miTvMode = findViewById(R.id.mi_tv_mode);
+        miStatusRow = findViewById(R.id.mi_status_row);
+        miTvStatusSpeed = findViewById(R.id.mi_tv_status_speed);
+        miTvStatusSwing = findViewById(R.id.mi_tv_status_swing);
+        miExtraRow = findViewById(R.id.mi_extra_row);
+        miBtnTurbo = findViewById(R.id.mi_btn_turbo);
+        miBtnLed = findViewById(R.id.mi_btn_led);
+        miBtnClean = findViewById(R.id.mi_btn_clean);
         miBtnPower = findViewById(R.id.mi_btn_power);
         miIvPowerIcon = findViewById(R.id.mi_iv_power_icon);
         miBtnMode = findViewById(R.id.mi_btn_mode);
@@ -188,13 +193,13 @@ public class MainActivity extends AppCompatActivity {
 
         btnSwitchToPairing.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
-            switchTab(1);
+            switchTab(2);
         });
 
         // Temp
         btnTempMinus.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
-            if (currentTemp > 16) {
+            if (currentTemp > CoolixEncoder.TEMP_MIN) {
                 currentTemp--;
                 tvTempDisplay.setText(currentTemp + "°C");
                 prefs.edit().putInt("temp", currentTemp).apply();
@@ -203,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnTempPlus.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
-            if (currentTemp < 30) {
+            if (currentTemp < CoolixEncoder.TEMP_MAX) {
                 currentTemp++;
                 tvTempDisplay.setText(currentTemp + "°C");
                 prefs.edit().putInt("temp", currentTemp).apply();
@@ -213,11 +218,10 @@ public class MainActivity extends AppCompatActivity {
         // Quick Controls
         btnQuickPowerOn.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
-            AcProtocolDatabase.BrandData brand = getActiveBrand();
-            AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
-            int[] pattern = AcProtocolDatabase.buildPowerOnPattern(brand, code, currentTemp, currentFanSpeed);
-            irTransmitter.transmit(brand.carrier, pattern);
-            Toast.makeText(this, "Đã gửi lệnh Bật điều hòa (" + currentTemp + "°C - Quạt " + FAN_SPEED_NAMES[currentFanSpeed] + ")", Toast.LENGTH_SHORT).show();
+            isAcOn = true;
+            transmitCurrentState();
+            updateMiRemoteUI();
+            Toast.makeText(this, "Đã gửi lệnh Bật điều hòa (" + MI_MODES[miModeIndex] + " " + currentTemp + "°C - Quạt " + FAN_SPEED_NAMES[currentFanSpeed] + ")", Toast.LENGTH_SHORT).show();
         });
 
         btnQuickPowerOff.setOnClickListener(v -> {
@@ -226,6 +230,8 @@ public class MainActivity extends AppCompatActivity {
             AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
             int[] pattern = AcProtocolDatabase.buildPowerOffPattern(brand, code);
             irTransmitter.transmit(brand.carrier, pattern);
+            isAcOn = false;
+            updateMiRemoteUI();
             Toast.makeText(this, "Đã gửi lệnh Tắt điều hòa", Toast.LENGTH_SHORT).show();
         });
 
@@ -234,12 +240,8 @@ public class MainActivity extends AppCompatActivity {
             currentFanSpeed = (currentFanSpeed + 1) % 4;
             prefs.edit().putInt("fan_speed", currentFanSpeed).apply();
             updateFanSpeedUI();
-
-            AcProtocolDatabase.BrandData brand = getActiveBrand();
-            AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
-            int[] pattern = AcProtocolDatabase.buildPowerOnPattern(brand, code, currentTemp, currentFanSpeed);
-            irTransmitter.transmit(brand.carrier, pattern);
-
+            transmitCurrentState();
+            updateMiRemoteUI();
             Toast.makeText(this, "Đã đổi tốc độ gió: " + FAN_SPEED_NAMES[currentFanSpeed], Toast.LENGTH_SHORT).show();
         });
 
@@ -256,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
             SoundFeedback.playClick(this);
             AcProtocolDatabase.BrandData brand = getActiveBrand();
             AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
-            int[] pattern = AcProtocolDatabase.buildCancelTimerPattern(brand, code);
+            int[] pattern = AcProtocolDatabase.buildCancelTimerPattern(brand, code, MI_MODES[miModeIndex], currentTemp, currentFanSpeed);
             irTransmitter.transmit(brand.carrier, pattern);
             Toast.makeText(this, "⏰ Đã gửi lệnh Hủy Hẹn Giờ", Toast.LENGTH_SHORT).show();
         });
@@ -314,112 +316,57 @@ public class MainActivity extends AppCompatActivity {
         miBtnPower.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
             isAcOn = !isAcOn;
-            AcProtocolDatabase.BrandData brand = getActiveBrand();
-            AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
-
             if (isAcOn) {
-                int[] pattern = AcProtocolDatabase.buildPowerOnPattern(brand, code, currentTemp, currentFanSpeed);
-                irTransmitter.transmit(brand.carrier, pattern);
-                Toast.makeText(this, "🟢 Đã BẬT điều hòa (Mã 6 Coolix)", Toast.LENGTH_SHORT).show();
+                transmitCurrentState();
+                Toast.makeText(this, "🟢 Đã BẬT điều hòa (" + MI_MODES[miModeIndex] + " " + currentTemp + "°C)", Toast.LENGTH_SHORT).show();
             } else {
-                int[] pattern = AcProtocolDatabase.buildPowerOffPattern(brand, code);
-                irTransmitter.transmit(brand.carrier, pattern);
-                Toast.makeText(this, "🛑 Đã TẮT điều hòa (Mã 5 Coolix)", Toast.LENGTH_SHORT).show();
+                AcProtocolDatabase.BrandData brand = getActiveBrand();
+                AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
+                irTransmitter.transmit(brand.carrier, AcProtocolDatabase.buildPowerOffPattern(brand, code));
+                Toast.makeText(this, "🛑 Đã TẮT điều hòa", Toast.LENGTH_SHORT).show();
             }
             updateMiRemoteUI();
         });
 
         miBtnMode.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
-            if (!isAcOn) {
-                Toast.makeText(this, "⚠️ Vui lòng bật nguồn trước!", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            if (!requirePower()) return;
             miModeIndex = (miModeIndex + 1) % MI_MODES.length;
+            transmitCurrentState();
+            updateFanSpeedUI();
             updateMiRemoteUI();
             Toast.makeText(this, "❄️ Chế độ: " + MI_MODES[miModeIndex], Toast.LENGTH_SHORT).show();
         });
 
         miBtnSpeed.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
-            if (!isAcOn) {
-                Toast.makeText(this, "⚠️ Vui lòng bật nguồn trước!", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            if (!requirePower()) return;
             currentFanSpeed = (currentFanSpeed + 1) % 4;
             prefs.edit().putInt("fan_speed", currentFanSpeed).apply();
             updateFanSpeedUI();
-
-            AcProtocolDatabase.BrandData brand = getActiveBrand();
-            AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
-            int[] pattern = AcProtocolDatabase.buildPowerOnPattern(brand, code, currentTemp, currentFanSpeed);
-            irTransmitter.transmit(brand.carrier, pattern);
-
+            transmitCurrentState();
             updateMiRemoteUI();
             Toast.makeText(this, "💨 Tốc độ gió: " + FAN_SPEED_NAMES[currentFanSpeed], Toast.LENGTH_SHORT).show();
         });
 
         miBtnDirection.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
-            AcProtocolDatabase.BrandData brand = getActiveBrand();
-            AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
-            int[] pattern = AcProtocolDatabase.buildSwingPattern(brand, code);
-            irTransmitter.transmit(brand.carrier, pattern);
-            Toast.makeText(this, "📐 Đã gửi lệnh chỉnh nấc cánh vẫy gió", Toast.LENGTH_SHORT).show();
+            transmitCoolixCommand(CoolixEncoder.CMD_SWING_STEP, "chỉnh nấc cánh gió");
         });
 
         miBtnSwing.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
+            if (!requirePower()) return;
             isSwingOn = !isSwingOn;
             AcProtocolDatabase.BrandData brand = getActiveBrand();
             AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
-            int[] pattern = AcProtocolDatabase.buildSwingPattern(brand, code);
-            irTransmitter.transmit(brand.carrier, pattern);
+            irTransmitter.transmit(brand.carrier, AcProtocolDatabase.buildSwingPattern(brand, code));
             updateMiRemoteUI();
             Toast.makeText(this, "↔ Đảo gió (Swing): " + (isSwingOn ? "BẬT" : "TẮT"), Toast.LENGTH_SHORT).show();
         });
 
-        miBtnTempDown.setOnClickListener(v -> {
-            SoundFeedback.playClick(this);
-            if (!isAcOn) {
-                Toast.makeText(this, "⚠️ Vui lòng bật nguồn trước!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (currentTemp > 16) {
-                currentTemp--;
-                prefs.edit().putInt("temp", currentTemp).apply();
-                tvTempDisplay.setText(currentTemp + "°C");
-
-                AcProtocolDatabase.BrandData brand = getActiveBrand();
-                AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
-                int[] pattern = AcProtocolDatabase.buildPowerOnPattern(brand, code, currentTemp, currentFanSpeed);
-                irTransmitter.transmit(brand.carrier, pattern);
-
-                updateMiRemoteUI();
-                Toast.makeText(this, "❄️ Nhiệt độ: " + currentTemp + "°C", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        miBtnTempUp.setOnClickListener(v -> {
-            SoundFeedback.playClick(this);
-            if (!isAcOn) {
-                Toast.makeText(this, "⚠️ Vui lòng bật nguồn trước!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (currentTemp < 30) {
-                currentTemp++;
-                prefs.edit().putInt("temp", currentTemp).apply();
-                tvTempDisplay.setText(currentTemp + "°C");
-
-                AcProtocolDatabase.BrandData brand = getActiveBrand();
-                AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
-                int[] pattern = AcProtocolDatabase.buildPowerOnPattern(brand, code, currentTemp, currentFanSpeed);
-                irTransmitter.transmit(brand.carrier, pattern);
-
-                updateMiRemoteUI();
-                Toast.makeText(this, "❄️ Nhiệt độ: " + currentTemp + "°C", Toast.LENGTH_SHORT).show();
-            }
-        });
+        miBtnTempDown.setOnClickListener(v -> changeMiTemp(-1));
+        miBtnTempUp.setOnClickListener(v -> changeMiTemp(1));
 
         miBtnTempClick.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
@@ -433,37 +380,89 @@ public class MainActivity extends AppCompatActivity {
 
         miBtnSleep.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
-            Toast.makeText(this, "🌙 Đã gửi lệnh Sleep Mode", Toast.LENGTH_SHORT).show();
+            transmitCoolixCommand(CoolixEncoder.CMD_SLEEP, "Sleep");
         });
 
+        // Như Mi Remote: ••• mở thêm hàng phím phụ
         miBtnMore.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
-            Toast.makeText(this, "⚙️ Tùy chọn cài đặt điều hòa", Toast.LENGTH_SHORT).show();
+            miExtraRow.setVisibility(miExtraRow.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
         });
 
-        miBtnBack.setOnClickListener(v -> {
+        miBtnTurbo.setOnClickListener(v -> {
             SoundFeedback.playClick(this);
-            switchTab(0);
+            transmitCoolixCommand(CoolixEncoder.CMD_TURBO, "Turbo");
+        });
+
+        miBtnLed.setOnClickListener(v -> {
+            SoundFeedback.playClick(this);
+            transmitCoolixCommand(CoolixEncoder.CMD_LED, "Đèn màn hình LED");
+        });
+
+        miBtnClean.setOnClickListener(v -> {
+            SoundFeedback.playClick(this);
+            transmitCoolixCommand(CoolixEncoder.CMD_CLEAN, "Tự làm sạch (Clean)");
         });
     }
 
-    private void updateMiRemoteUI() {
-        if (miTvOffLabel == null) return;
-        if (isAcOn) {
-            miTvOffLabel.setVisibility(View.GONE);
-            miLayoutOnDisplay.setVisibility(View.VISIBLE);
-            miDisplayArea.setBackgroundColor(0xFF182230);
-            miIvPowerIcon.setImageResource(R.drawable.ic_power_green);
-            miTvDisplayTemp.setText(String.valueOf(currentTemp));
-            miBadgeMode.setText(MI_MODES[miModeIndex]);
-            miBadgeSpeed.setText("SPEED: " + FAN_SPEED_NAMES[currentFanSpeed].toUpperCase());
-            miBadgeSwing.setText(isSwingOn ? "SWING ON" : "SWING OFF");
-        } else {
-            miTvOffLabel.setVisibility(View.VISIBLE);
-            miLayoutOnDisplay.setVisibility(View.GONE);
-            miDisplayArea.setBackgroundColor(0xFF181818);
-            miIvPowerIcon.setImageResource(R.drawable.ic_power_gray);
+    // Nút chỉ có tác dụng khi máy đang bật (giống remote thật)
+    private boolean requirePower() {
+        if (!isAcOn) {
+            Toast.makeText(this, "⚠️ Vui lòng bật nguồn trước!", Toast.LENGTH_SHORT).show();
         }
+        return isAcOn;
+    }
+
+    // Coolix không có lệnh lẻ cho chế độ/quạt/nhiệt độ: phát lại toàn bộ khung trạng thái
+    private void transmitCurrentState() {
+        AcProtocolDatabase.BrandData brand = getActiveBrand();
+        AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
+        int[] pattern = AcProtocolDatabase.buildPowerOnPattern(brand, code, MI_MODES[miModeIndex], currentTemp, currentFanSpeed);
+        irTransmitter.transmit(brand.carrier, pattern);
+    }
+
+    // Lệnh cố định (Sleep, Direction, Turbo, LED, Clean) hiện chỉ bộ mã Coolix có
+    private void transmitCoolixCommand(int command, String label) {
+        if (!requirePower()) return;
+        AcProtocolDatabase.BrandData brand = getActiveBrand();
+        AcProtocolDatabase.CodeProfile code = getActiveCode(brand);
+        if (!AcProtocolDatabase.isCoolix(code)) {
+            Toast.makeText(this, "Bộ mã đang dùng chưa hỗ trợ lệnh " + label, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        irTransmitter.transmit(brand.carrier, CoolixEncoder.pattern(command));
+        Toast.makeText(this, "Đã gửi lệnh " + label, Toast.LENGTH_SHORT).show();
+    }
+
+    private void changeMiTemp(int delta) {
+        SoundFeedback.playClick(this);
+        if (!requirePower()) return;
+        if ("FAN".equals(MI_MODES[miModeIndex])) {
+            Toast.makeText(this, "Chế độ Quạt không chỉnh được nhiệt độ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        int next = currentTemp + delta;
+        if (next < CoolixEncoder.TEMP_MIN || next > CoolixEncoder.TEMP_MAX) return;
+        currentTemp = next;
+        prefs.edit().putInt("temp", currentTemp).apply();
+        tvTempDisplay.setText(currentTemp + "°C");
+        transmitCurrentState();
+        updateMiRemoteUI();
+        Toast.makeText(this, "❄️ Nhiệt độ: " + currentTemp + "°C", Toast.LENGTH_SHORT).show();
+    }
+
+    // Đồng bộ vùng hiển thị kiểu Mi Remote: máy tắt thì làm mờ và ghi "Off"
+    private void updateMiRemoteUI() {
+        if (miTvDisplayTemp == null) return;
+        int dim = 0xFF4A4A4A;
+        miTvDisplayTemp.setText(String.valueOf(currentTemp));
+        miTvDisplayTemp.setTextColor(isAcOn ? 0xFFF2F2F2 : dim);
+        miTvUnit.setTextColor(isAcOn ? 0xFFE0E0E0 : dim);
+        miTvMode.setText(isAcOn ? MI_MODE_LABELS[miModeIndex] : "Off");
+        miStatusRow.setAlpha(isAcOn ? 1f : 0.45f);
+        miTvStatusSpeed.setText("▤ Speed " + MI_SPEED_LABELS[currentFanSpeed]);
+        miTvStatusSwing.setText("≋ " + (isSwingOn ? "Swing" : "Fixed"));
+        miIvPowerIcon.setImageResource(isAcOn ? R.drawable.ic_power_green : R.drawable.ic_power_gray);
     }
 
     private void toggleAutoScan() {
@@ -618,7 +617,7 @@ public class MainActivity extends AppCompatActivity {
             btnFanSpeed.setText("Gió: " + FAN_SPEED_NAMES[currentFanSpeed]);
         }
         if (tvModeFanDisplay != null) {
-            tvModeFanDisplay.setText("COOL / " + FAN_SPEED_NAMES[currentFanSpeed].toUpperCase());
+            tvModeFanDisplay.setText(MI_MODES[miModeIndex] + " / " + FAN_SPEED_NAMES[currentFanSpeed].toUpperCase());
         }
     }
 
@@ -630,18 +629,23 @@ public class MainActivity extends AppCompatActivity {
         int hours = deltaMinutes / 60;
         int mins = deltaMinutes % 60;
 
-        // BƯỚC 1: Phát lệnh Bật máy
-        int[] powerOnPattern = AcProtocolDatabase.buildPowerOnPattern(brand, code, currentTemp, currentFanSpeed);
-        boolean ok1 = irTransmitter.transmit(brand.carrier, powerOnPattern);
+        String mode = MI_MODES[miModeIndex];
+        int temp = currentTemp;
 
-        // BƯỚC 2: Sau 350ms, phát lệnh Hẹn Giờ Tắt (Coolix-48)
+        // BƯỚC 1: Phát lệnh Bật máy
+        int[] powerOnPattern = AcProtocolDatabase.buildPowerOnPattern(brand, code, mode, temp, currentFanSpeed);
+        boolean ok1 = irTransmitter.transmit(brand.carrier, powerOnPattern);
+        isAcOn = true;
+        updateMiRemoteUI();
+
+        // BƯỚC 2: Nghỉ cho máy lạnh xử lý xong lệnh Bật, rồi phát lệnh Hẹn Giờ Tắt (COOLIX48 kèm trạng thái)
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            int[] timerPattern = AcProtocolDatabase.buildTimerPattern(brand, code, currentTemp, deltaMinutes);
+            int[] timerPattern = AcProtocolDatabase.buildTimerPattern(brand, code, mode, temp, deltaMinutes);
             boolean ok2 = irTransmitter.transmit(brand.carrier, timerPattern);
             if (ok2) {
                 Toast.makeText(this, "⚡ Đã Bật máy & Hẹn giờ tắt lúc 7:30 sáng (" + hours + "h " + mins + "p nữa)!", Toast.LENGTH_LONG).show();
             }
-        }, 350);
+        }, AcProtocolDatabase.COMMAND_GAP_MS);
 
         if (!ok1) {
             Toast.makeText(this, "⚠️ Không phát được hồng ngoại! Hãy kiểm tra quyền hoặc cổng IR.", Toast.LENGTH_SHORT).show();

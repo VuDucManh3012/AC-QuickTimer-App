@@ -5,7 +5,37 @@
         <item name="colorOnPrimary">@color/text_white</item>
         <item name="android:windowBackground">@color/bg_dark</item>
         <item name="android:statusBarColor">@color/bg_dark</item>
+        <item name="materialButtonStyle">@style/Widget.ACQuickTimer.Button</item>
+    </style>
+
+    <!-- MaterialButton tô colorPrimary đè lên android:background; tắt tint để giữ màu drawable -->
+    <style name="Widget.ACQuickTimer.Button" parent="Widget.MaterialComponents.Button">
         <item name="backgroundTint">@null</item>
-        <item name="android:backgroundTint">@null</item>
+    </style>
+
+    <!-- Phím lưới phẳng màn Remote Mi (clone app Mi Remote, dark theme) -->
+    <style name="MiKey" parent="Widget.ACQuickTimer.Button">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@drawable/mi_grid_cell</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textColor">#E0E0E0</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:padding">0dp</item>
+    </style>
+
+    <!-- Phím chữ xám mờ như Swing/Timer/Sleep/••• trong ảnh mẫu -->
+    <style name="MiKey.Dim">
+        <item name="android:textColor">#5C5C5C</item>
+    </style>
+
+    <!-- Phím − / + nhiệt độ -->
+    <style name="MiKey.Big">
+        <item name="android:textColor">#F2F2F2</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
     </style>
 </resources>

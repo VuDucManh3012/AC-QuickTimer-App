@@ -1073,129 +1073,92 @@
     }
 
     /* ========================================================= */
-    /* VIEW 4: MI REMOTE FULL CONTROLLER (GIỐNG HỆT ẢNH MẪU 100%) */
+    /* VIEW 4: MI REMOTE - CLONE APP MI REMOTE XIAOMI (DARK THEME) */
     /* ========================================================= */
     .mi-remote-view {
       display: flex;
       flex-direction: column;
       height: 100%;
       width: 100%;
-      background: #181818;
-      position: relative;
+      background: #141414;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    .mi-remote-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 18px 8px;
-      color: #fff;
-      background: #181818;
-    }
-
-    .mi-btn-back {
-      font-size: 20px;
-      cursor: pointer;
-      color: #e5e7eb;
-      line-height: 1;
-      padding: 4px;
-    }
-
-    .mi-remote-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 15px;
-      font-weight: 500;
-      color: #f3f4f6;
-    }
-
-    .mi-remote-icon-badge {
-      font-size: 14px;
-    }
-
-    .mi-btn-more {
-      font-size: 18px;
-      cursor: pointer;
-      color: #9ca3af;
-      padding: 4px;
-    }
-
-    /* Màn hình hiển thị trạng thái phía trên (Upper Display) */
+    /* Vùng hiển thị trạng thái nền xám đậm */
     .mi-display-area {
       flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
+      background: #1e1e1e;
+      padding: 14px 14px 12px;
+    }
+
+    /* Nhiệt độ lớn ở giữa, °C góc trên và chế độ góc dưới */
+    .mi-screen-main {
+      flex: 1;
+      display: flex;
       align-items: center;
       justify-content: center;
-      background: #181818;
-      position: relative;
-      min-height: 180px;
-      transition: background 0.3s;
-    }
-
-    .mi-display-area.on {
-      background: radial-gradient(circle at 50% 30%, #1c2635 0%, #181818 75%);
-    }
-
-    .mi-screen-off-label {
-      font-size: 12px;
-      color: #4b5563;
-      letter-spacing: 0.5px;
-    }
-
-    .mi-screen-on-content {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .mi-display-area.on .mi-screen-off-label {
-      display: none;
-    }
-
-    .mi-display-area.on .mi-screen-on-content {
-      display: flex;
+      gap: 6px;
     }
 
     .mi-screen-temp {
-      font-size: 68px;
-      font-weight: 200;
-      color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 80px;
+      font-weight: 300;
       line-height: 1;
-      display: flex;
-      align-items: flex-start;
+      letter-spacing: -2px;
+      color: #f2f2f2;
+      transition: color 0.2s;
     }
 
-    .mi-screen-temp-unit {
-      font-size: 22px;
-      margin-top: 6px;
-      font-weight: 400;
-      color: #9ca3af;
+    .mi-screen-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 68px;
     }
 
-    .mi-screen-sub-badges {
+    .mi-screen-unit {
+      font-size: 14px;
+      color: #e0e0e0;
+    }
+
+    .mi-screen-mode {
+      font-size: 12px;
+      color: #a8a8a8;
+      white-space: nowrap;
+    }
+
+    /* Hàng trạng thái Speed / Direction / Swing */
+    .mi-status-row {
       display: flex;
+      justify-content: space-between;
       gap: 8px;
-      margin-top: 14px;
-      font-size: 11px;
-      color: #38bdf8;
+      font-size: 10px;
+      color: #8a8a8a;
+      transition: opacity 0.2s;
     }
 
-    .mi-screen-badge-pill {
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-weight: 500;
+    .mi-status-row > span {
+      max-width: 34%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    /* Bàn phím điều khiển dạng lưới phẳng (Mi Grid Controller) */
+    .mi-display-area.off .mi-screen-temp,
+    .mi-display-area.off .mi-screen-unit {
+      color: #4a4a4a;
+    }
+
+    .mi-display-area.off .mi-status-row {
+      opacity: 0.45;
+    }
+
+    /* Bàn phím lưới phẳng nền tối, đường kẻ mảnh */
     .mi-keypad-grid {
-      background: #1e1e1e;
-      border-top: 1px solid #282828;
+      background: #141414;
       display: flex;
       flex-direction: column;
       user-select: none;
@@ -1203,23 +1166,22 @@
 
     .mi-grid-row {
       display: flex;
-      border-bottom: 1px solid #282828;
+      border-top: 1px solid #262626;
     }
 
     .mi-key-btn {
       flex: 1;
+      height: 80px;
       background: transparent;
       border: none;
-      border-right: 1px solid #282828;
-      color: #d1d5db;
-      font-size: 13.5px;
-      font-weight: 400;
+      border-right: 1px solid #262626;
+      color: #e0e0e0;
+      font-family: inherit;
+      font-size: 13px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 21px 8px;
       cursor: pointer;
-      position: relative;
       transition: background 0.12s;
     }
 
@@ -1227,52 +1189,39 @@
       border-right: none;
     }
 
+    .mi-extra-row {
+      display: none;
+    }
+
+    .mi-extra-row.open {
+      display: flex;
+    }
+
     .mi-key-btn:active {
-      background: #2a2a2a;
+      background: #262626;
     }
 
-    /* Nút nguồn icon tròn màu xanh lá cây */
-    .mi-power-svg {
-      width: 24px;
-      height: 24px;
-      color: #22c55e;
-      transition: color 0.2s, filter 0.2s;
+    /* Nút chữ xám mờ như Swing/Timer/Sleep/••• trong ảnh mẫu */
+    .mi-key-btn.mi-key-dim {
+      color: #5c5c5c;
     }
 
-    .mi-power-svg.off {
-      color: #6b7280;
-    }
-
-    .mi-key-btn:hover .mi-power-svg {
-      filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.6));
-    }
-
-    /* Hàng Temp với 3 nút: - | Temp | + */
     .mi-temp-minus, .mi-temp-plus {
       font-size: 24px;
       font-weight: 300;
-      color: #f3f4f6;
+      color: #f2f2f2;
     }
 
-    .mi-temp-label {
-      font-size: 13.5px;
-      color: #d1d5db;
-      font-weight: 400;
+    /* Icon nguồn viền xanh ngọc, xám khi máy tắt */
+    .mi-power-svg {
+      width: 18px;
+      height: 18px;
+      color: #1fb58f;
+      transition: color 0.2s;
     }
 
-    .mi-home-bar-bottom {
-      height: 24px;
-      background: #1e1e1e;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .mi-home-pill {
-      width: 76px;
-      height: 4px;
-      background: #52525b;
-      border-radius: 999px;
+    .mi-power-svg.off {
+      color: #6b6b6b;
     }
   </style>
 </head>
@@ -1320,7 +1269,7 @@
                 <div class="ac-icon-box">❄️</div>
                 <div>
                   <div class="ac-name-tag" id="currentAcName">Funiki (Hòa Phát)</div>
-                  <div class="ac-code-tag" id="currentCodeTag">Mã: Funiki Mã 6 (Coolix Bật Máy)</div>
+                  <div class="ac-code-tag" id="currentCodeTag">Mã: Funiki Mã 1 - Coolix 24-bit</div>
                 </div>
               </div>
               <button class="btn-change-code" onclick="switchView('pairing')">Đổi mã</button>
@@ -1354,7 +1303,7 @@
                 <div class="qs-item">
                   <span class="qs-label">Chế độ & Quạt</span>
                   <div class="qs-value">
-                    <span>COOL / AUTO</span>
+                    <span id="valModeFan">COOL / AUTO</span>
                   </div>
                 </div>
               </div>
@@ -1392,7 +1341,7 @@
                   <div class="brand-logo-badge" id="brandTriggerInitial">F</div>
                   <div class="brand-trigger-text">
                     <div class="brand-trigger-name" id="brandTriggerName">Funiki (Hòa Phát)</div>
-                    <div class="brand-trigger-sub" id="brandTriggerSub">10 bộ mã có sẵn</div>
+                    <div class="brand-trigger-sub" id="brandTriggerSub">5 bộ mã có sẵn</div>
                   </div>
                 </div>
                 <div class="brand-arrow">▼</div>
@@ -1482,41 +1431,31 @@
             </div>
           </div>
 
-          <!-- VIEW 4: MI REMOTE CONTROLLER (THEO ĐÚNG ẢNH MẪU 100%) -->
+          <!-- VIEW 4: MI REMOTE - CLONE APP MI REMOTE XIAOMI (DARK THEME) -->
           <div id="viewRemote" style="display: none;" class="mi-remote-view">
-            <!-- Header chuẩn: < Bedroom FunikiAC 🔥 ⋮ -->
-            <div class="mi-remote-header">
-              <span class="mi-btn-back" onclick="switchView('routine')" title="Quay lại">‹</span>
-              <div class="mi-remote-title-wrap">
-                <span>Bedroom FunikiAC</span>
-                <span class="mi-remote-icon-badge" id="miHeaderFlame">🔥</span>
+            <!-- Vùng hiển thị trạng thái (nhiệt độ + chế độ + trạng thái gió) -->
+            <div class="mi-display-area off" id="miDisplayArea">
+              <div class="mi-screen-main">
+                <span class="mi-screen-temp" id="miDisplayTemp">26</span>
+                <div class="mi-screen-side">
+                  <span class="mi-screen-unit">°C</span>
+                  <span class="mi-screen-mode"><span id="miModeIcon">❄</span> <span id="miModeLabel">Off</span></span>
+                </div>
               </div>
-              <span class="mi-btn-more" title="Tùy chọn">⋮</span>
-            </div>
 
-            <!-- Khu vực hiển thị AC (Upper Display Area) -->
-            <div class="mi-display-area" id="miDisplayArea">
-              <span class="mi-screen-off-label" id="miScreenOffText">ĐIỀU HÒA ĐANG TẮT</span>
-              
-              <div class="mi-screen-on-content" id="miScreenOnContent">
-                <div class="mi-screen-temp">
-                  <span id="miDisplayTemp">26</span>
-                  <span class="mi-screen-temp-unit">°C</span>
-                </div>
-                <div class="mi-screen-sub-badges">
-                  <span class="mi-screen-badge-pill" id="miBadgeMode">COOL</span>
-                  <span class="mi-screen-badge-pill" id="miBadgeSpeed">SPEED: AUTO</span>
-                  <span class="mi-screen-badge-pill" id="miBadgeSwing">SWING ON</span>
-                </div>
+              <div class="mi-status-row">
+                <span>▤ <span id="miStatusSpeed">Speed Auto</span></span>
+                <span>→ Direction Manual</span>
+                <span>≋ <span id="miStatusSwing">Fixed</span></span>
               </div>
             </div>
 
             <!-- Bàn phím dạng lưới phẳng (Mi Remote Grid) -->
             <div class="mi-keypad-grid">
-              <!-- Hàng 1: Nguồn (icon tròn xanh lá) & Mode -->
+              <!-- Hàng 1: Nguồn & Mode -->
               <div class="mi-grid-row">
                 <button class="mi-key-btn" onclick="onMiRemoteKey('POWER')" title="Bật/Tắt nguồn">
-                  <svg id="miPowerSvgIcon" class="mi-power-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                  <svg id="miPowerSvgIcon" class="mi-power-svg off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
                     <line x1="12" y1="2" x2="12" y2="12"></line>
                   </svg>
@@ -1528,26 +1467,28 @@
               <div class="mi-grid-row">
                 <button class="mi-key-btn" onclick="onMiRemoteKey('SPEED')">Speed</button>
                 <button class="mi-key-btn" onclick="onMiRemoteKey('DIRECTION')">Direction</button>
-                <button class="mi-key-btn" onclick="onMiRemoteKey('SWING')">Swing</button>
+                <button class="mi-key-btn mi-key-dim" onclick="onMiRemoteKey('SWING')">Swing</button>
               </div>
 
-              <!-- Hàng 3: Điều khiển nhiệt độ Temp: — | Temp | + -->
+              <!-- Hàng 3: — | Temp | + -->
               <div class="mi-grid-row">
-                <button class="mi-key-btn mi-temp-minus" onclick="onMiRemoteKey('TEMP_DOWN')">—</button>
-                <button class="mi-key-btn mi-temp-label" onclick="onMiRemoteKey('TEMP_CLICK')">Temp</button>
+                <button class="mi-key-btn mi-temp-minus" onclick="onMiRemoteKey('TEMP_DOWN')">−</button>
+                <button class="mi-key-btn" onclick="onMiRemoteKey('TEMP_CLICK')">Temp</button>
                 <button class="mi-key-btn mi-temp-plus" onclick="onMiRemoteKey('TEMP_UP')">+</button>
               </div>
 
               <!-- Hàng 4: Timer & Sleep & ••• -->
               <div class="mi-grid-row">
-                <button class="mi-key-btn" onclick="onMiRemoteKey('TIMER')">Timer</button>
-                <button class="mi-key-btn" onclick="onMiRemoteKey('SLEEP')">Sleep</button>
-                <button class="mi-key-btn" onclick="onMiRemoteKey('MORE')">•••</button>
+                <button class="mi-key-btn mi-key-dim" onclick="onMiRemoteKey('TIMER')">Timer</button>
+                <button class="mi-key-btn mi-key-dim" onclick="onMiRemoteKey('SLEEP')">Sleep</button>
+                <button class="mi-key-btn mi-key-dim" onclick="onMiRemoteKey('MORE')">···</button>
               </div>
 
-              <!-- Thanh Home Bar phía dưới màn hình -->
-              <div class="mi-home-bar-bottom">
-                <div class="mi-home-pill"></div>
+              <!-- Hàng phím phụ, mở bằng ••• -->
+              <div class="mi-grid-row mi-extra-row" id="miExtraRow">
+                <button class="mi-key-btn" onclick="onMiRemoteKey('TURBO')">Turbo</button>
+                <button class="mi-key-btn" onclick="onMiRemoteKey('LED')">Light</button>
+                <button class="mi-key-btn" onclick="onMiRemoteKey('CLEAN')">Clean</button>
               </div>
             </div>
           </div>
@@ -1644,19 +1585,15 @@
       funiki: {
         name: "Funiki (Hòa Phát)",
         carrier: 38000,
+        // Mỗi mã = 1 bộ remote đầy đủ nút (như Mi Remote), không phải 1 lệnh lẻ
         codes: [
-          { id: 1, name: "Funiki Mã 1 (Remote RG10B Power)", proto: "MIDEA_RG10", timerType: "delta" },
-          { id: 2, name: "Funiki Mã 2 (Remote RG10B Cool 26°C)", proto: "MIDEA_RG10", timerType: "delta" },
-          { id: 3, name: "Funiki Mã 3 (Remote RG10B Cool 25°C)", proto: "MIDEA_RG10", timerType: "delta" },
-          { id: 4, name: "Funiki Mã 4 (Mi Remote Bộ Mã 4 - Coolix)", proto: "COOLIX_4D", timerType: "delta" },
-          { id: 5, name: "Funiki Mã 5 (Lệnh Tắt Máy - Coolix 0xB2 0x7B 0xE0)", proto: "COOLIX_7B", timerType: "delta" },
-          { id: 6, name: "Funiki Mã 6 (Lệnh Bật Máy - Coolix 0xB2 0x1F 0x48)", proto: "COOLIX_1F", timerType: "delta" },
-          { id: 7, name: "Funiki Mã 7 (Mi Remote Bộ Mã 3 - Coolix)", proto: "COOLIX_DF", timerType: "delta" },
-          { id: 8, name: "Funiki Mã 8 (Midea 48-bit Classic)", proto: "MIDEA_48", timerType: "delta" },
-          { id: 9, name: "Funiki Mã 9 (Bo Mạch AUX 0xC3)", proto: "AUX_C3", timerType: "delta" },
-          { id: 10, name: "Funiki Mã 10 (Bo Mạch Gree 64-bit)", proto: "GREE_64", timerType: "delta" }
+          { id: 1, name: "Funiki Mã 1 - Coolix 24-bit (đủ nút, đã kiểm chứng)", proto: "COOLIX", timerType: "delta" },
+          { id: 2, name: "Funiki Mã 2 - Midea RG10B 48-bit", proto: "MIDEA_RG10", timerType: "delta" },
+          { id: 3, name: "Funiki Mã 3 - Midea 48-bit Classic", proto: "MIDEA_48", timerType: "delta" },
+          { id: 4, name: "Funiki Mã 4 - Bo mạch AUX", proto: "AUX_C3", timerType: "delta" },
+          { id: 5, name: "Funiki Mã 5 - Bo mạch Gree 64-bit", proto: "GREE_64", timerType: "delta" }
         ],
-        workingCodeIndex: 5
+        workingCodeIndex: 0
       },
       panasonic: {
         name: "Panasonic",
@@ -1699,16 +1636,6 @@
           { id: 2, name: "Gree Inverter Modern (8-byte)", proto: "GREE_MODERN", timerType: "delta" },
           { id: 3, name: "Gree Cozy / Fairy Series", proto: "GREE_COZY", timerType: "delta" },
           { id: 4, name: "Gree Multi-Split System", proto: "GREE_MULTI", timerType: "delta" }
-        ],
-        workingCodeIndex: 0
-      },
-      funiki: {
-        name: "Funiki (Hòa Phát)",
-        carrier: 38000,
-        codes: [
-          { id: 1, name: "Funiki Inverter HIC Series", proto: "MIDEA_RG57", timerType: "delta" },
-          { id: 2, name: "Funiki Standard HSC Series", proto: "FUNIKI_HSC", timerType: "delta" },
-          { id: 3, name: "Funiki Aux-based Protocol", proto: "AUX_PROTOCOL", timerType: "delta" }
         ],
         workingCodeIndex: 0
       },
@@ -1870,10 +1797,10 @@
 
     // App State
     let currentBrandKey = "funiki";
-    let pairingStepIndex = 5; // Mã 6 (Bật máy Coolix)
+    let pairingStepIndex = 0; // Mã 1 (Coolix)
     let activeConfig = {
       brandKey: "funiki",
-      codeIndex: 5, // Mã 6
+      codeIndex: 0, // Mã 1 (Coolix)
       temp: 26,
       targetHour: 7,
       targetMinute: 30
@@ -2021,39 +1948,139 @@
       }
     }
 
-    // STATE CỦA MI REMOTE
-    const miRemoteModes = ["COOL", "DRY", "FAN", "AUTO"];
+    // ===== BỘ MÃ HÓA COOLIX 24-BIT (theo đặc tả IRremoteESP8266 ir_Coolix.h/.cpp) =====
+    // Khung trạng thái: [0xB2][Fan 3 bit | SensorTemp 5 bit][Temp 4 bit | Mode 2 bit | 00]
+    // Bật máy = phát khung trạng thái; Tắt/Swing/Sleep/Turbo... là lệnh cố định.
+    const COOLIX_TEMP_MIN = 17;
+    const COOLIX_TEMP_MAX = 30;
+    const COOLIX_TEMP_MAP = [0b0000, 0b0001, 0b0011, 0b0010, 0b0110, 0b0111, 0b0101,
+                             0b0100, 0b1100, 0b1101, 0b1001, 0b1000, 0b1010, 0b1011]; // 17 → 30°C
+    const COOLIX_FAN_TEMP_CODE = 0b1110; // Chế độ Quạt không có nhiệt độ
+    const COOLIX_SENSOR_IGNORE = 0b11111;
+    // Chế độ Quạt được mã hóa thành Dry + temp code riêng
+    const COOLIX_MODE_BITS = { COOL: 0b00, DRY: 0b01, AUTO: 0b10, HEAT: 0b11, FAN: 0b01 };
+    // Quạt theo thứ tự [Auto, Thấp, Vừa, Cao]; Auto phụ thuộc chế độ nên tính riêng
+    const COOLIX_FAN_BITS = [null, 0b100, 0b010, 0b001];
+    const COOLIX_CMD = {
+      OFF: 0xB27BE0,
+      SWING: 0xB26BE0,
+      SWING_STEP: 0xB20FE0,
+      SLEEP: 0xB2E003,
+      TURBO: 0xB5F5A2,
+      LED: 0xB5F5A5,
+      CLEAN: 0xB5F5AA
+    };
+    const COOLIX_TICK = 276; // µs
+
+    function encodeCoolixState(mode, temp, fanIndex) {
+      const t = Math.min(COOLIX_TEMP_MAX, Math.max(COOLIX_TEMP_MIN, temp));
+      const tempCode = mode === 'FAN' ? COOLIX_FAN_TEMP_CODE : COOLIX_TEMP_MAP[t - COOLIX_TEMP_MIN];
+      // Auto/Dry dùng quạt "Auto0" (0b000), các chế độ khác dùng "Auto" (0b101)
+      const autoFan = (mode === 'AUTO' || mode === 'DRY') ? 0b000 : 0b101;
+      const fan = fanIndex === 0 ? autoFan : COOLIX_FAN_BITS[fanIndex];
+      return (0xB2 << 16) | (((fan << 5) | COOLIX_SENSOR_IGNORE) << 8) | (tempCode << 4) | (COOLIX_MODE_BITS[mode] << 2);
+    }
+
+    // Byte thực phát: mỗi byte kèm byte đảo bit, MSB-first
+    function coolixWireBytes(raw) {
+      const bytes = [];
+      for (let shift = 16; shift >= 0; shift -= 8) {
+        const b = (raw >> shift) & 0xFF;
+        bytes.push(b, b ^ 0xFF);
+      }
+      return bytes;
+    }
+
+    // Mảng mark/space (µs) đúng định dạng ConsumerIrManager.transmit()
+    function coolixTimings(raw) {
+      const out = [17 * COOLIX_TICK, 16 * COOLIX_TICK];
+      for (const b of coolixWireBytes(raw)) {
+        for (let i = 7; i >= 0; i--) {
+          out.push(2 * COOLIX_TICK, ((b >> i) & 1) ? 6 * COOLIX_TICK : 2 * COOLIX_TICK);
+        }
+      }
+      out.push(2 * COOLIX_TICK, 19 * COOLIX_TICK);
+      return out;
+    }
+
+    function describeCoolixFrame(title, raw, note) {
+      const hex = n => '0x' + n.toString(16).toUpperCase().padStart(2, '0');
+      const timings = coolixTimings(raw);
+      return `// [${title}] Giao thức COOLIX 24-bit
+// ${note}
+MÃ 24-BIT: 0x${raw.toString(16).toUpperCase()}
+PHÁT:      ${coolixWireBytes(raw).map(hex).join(' ')}
+           (mỗi byte kèm byte đảo, MSB-first, lặp 2 khung)
+CARRIER:   38,000 Hz | ${timings.length} xung mỗi khung
+TIMINGS:   [${timings.slice(0, 10).join(', ')}, ...]`;
+    }
+
+    // STATE CỦA MI REMOTE (thứ tự chế độ/quạt khớp bộ mã hóa Coolix)
+    const miRemoteModes = ["COOL", "HEAT", "DRY", "FAN", "AUTO"];
+    const miRemoteModeLabels = ["Cooling", "Heating", "Dry", "Fan", "Auto"];
+    const miRemoteModeIcons = ["❄", "☀", "≈", "✣", "Ⓐ"];
     let miRemoteModeIndex = 0;
     const miRemoteSpeeds = ["AUTO", "1 (THẤP)", "2 (VỪA)", "3 (CAO)"];
+    const miRemoteSpeedLabels = ["Auto", "Low", "Medium", "High"];
     let miRemoteSpeedIndex = 0;
-    let miRemoteSwingOn = true;
+    let miRemoteSwingOn = false;
 
+    function currentCoolixState() {
+      return encodeCoolixState(miRemoteModes[miRemoteModeIndex], acState.temp, miRemoteSpeedIndex);
+    }
+
+    function coolixStateNote() {
+      const mode = miRemoteModes[miRemoteModeIndex];
+      const temp = mode === 'FAN' ? '--' : `${acState.temp}°C`;
+      return `${mode} | ${temp} | Quạt ${miRemoteSpeedLabels[miRemoteSpeedIndex]}`;
+    }
+
+    function getActiveCode() {
+      const brand = COMPREHENSIVE_BRANDS[activeConfig.brandKey] || COMPREHENSIVE_BRANDS.funiki;
+      return { brand, code: brand.codes[activeConfig.codeIndex] || brand.codes[0] };
+    }
+
+    // Hiện khung IR sẽ phát theo bộ mã đang lưu; hiện mới có bộ mã hóa thật cho Coolix
+    function sendIrFrame(title, raw, note) {
+      const { brand, code } = getActiveCode();
+      document.getElementById('packetHexDisplay').innerText = code.proto === 'COOLIX'
+        ? describeCoolixFrame(title, raw, `${brand.name} | ${note}`)
+        : `// [${title}] ${brand.name} - ${code.name}\n// Giao thức ${code.proto} chưa có bộ mã hóa đầy đủ (hiện mới làm Coolix).`;
+    }
+
+    // Đồng bộ vùng hiển thị kiểu Mi Remote: máy tắt thì làm mờ và ghi "Off"
     function updateMiRemoteUI() {
-      const displayArea = document.getElementById('miDisplayArea');
-      const powerSvg = document.getElementById('miPowerSvgIcon');
-      const tempNum = document.getElementById('miDisplayTemp');
-      const badgeMode = document.getElementById('miBadgeMode');
-      const badgeSpeed = document.getElementById('miBadgeSpeed');
-      const badgeSwing = document.getElementById('miBadgeSwing');
+      const on = acState.power;
+      document.getElementById('miDisplayArea').classList.toggle('off', !on);
+      document.getElementById('miPowerSvgIcon').classList.toggle('off', !on);
+      document.getElementById('miDisplayTemp').innerText = acState.temp;
+      document.getElementById('miModeIcon').innerText = on ? miRemoteModeIcons[miRemoteModeIndex] : '';
+      document.getElementById('miModeLabel').innerText = on ? miRemoteModeLabels[miRemoteModeIndex] : 'Off';
+      document.getElementById('miStatusSpeed').innerText = `Speed ${miRemoteSpeedLabels[miRemoteSpeedIndex]}`;
+      document.getElementById('miStatusSwing').innerText = miRemoteSwingOn ? 'Swing' : 'Fixed';
+      // Tab 1-Chạm dùng chung trạng thái chế độ/quạt với Remote Mi
+      document.getElementById('valModeFan').innerText =
+        `${miRemoteModes[miRemoteModeIndex]} / ${miRemoteSpeedLabels[miRemoteSpeedIndex].toUpperCase()}`;
+      document.getElementById('demoFanSpeedBtn').innerText = `💨 Gió: ${demoFanSpeeds[miRemoteSpeedIndex]}`;
+    }
 
-      if (acState.power) {
-        displayArea.classList.add('on');
-        powerSvg.classList.remove('off');
-        tempNum.innerText = acState.temp;
-        badgeMode.innerText = miRemoteModes[miRemoteModeIndex];
-        badgeSpeed.innerText = `SPEED: ${miRemoteSpeeds[miRemoteSpeedIndex]}`;
-        badgeSwing.innerText = miRemoteSwingOn ? "SWING ON" : "SWING OFF";
-      } else {
-        displayArea.classList.remove('on');
-        powerSvg.classList.add('off');
-      }
+    // Nút chỉ có tác dụng khi máy đang bật (giống remote thật)
+    function requirePower() {
+      if (!acState.power) showToast("⚠️", "Hãy bật nguồn điều hòa trước!");
+      return acState.power;
+    }
+
+    // Coolix không có lệnh lẻ cho mode/quạt/nhiệt độ: đổi trạng thái rồi phát lại cả khung
+    function applyMiStateChange(title, toastIcon, toastText) {
+      updateAcWallUnit();
+      updateMiRemoteUI();
+      sendIrFrame(title, currentCoolixState(), coolixStateNote());
+      showToast(toastIcon, toastText);
     }
 
     function onMiRemoteKey(action) {
       flashIrEmitter();
       playBeep(2100, 0.12);
-
-      const brand = COMPREHENSIVE_BRANDS[activeConfig.brandKey] || COMPREHENSIVE_BRANDS['funiki'];
 
       if (action === 'POWER') {
         acState.power = !acState.power;
@@ -2064,82 +2091,58 @@
         updateMiRemoteUI();
 
         if (acState.power) {
-          document.getElementById('packetHexDisplay').innerText = 
-`// [PHÁT MÃ BẬT MÁY COOLIX]
-// Thương hiệu: ${brand.name} | Giao thức: COOLIX (24-bit MSB-first)
-LỆNH:   POWER_ON (Mã 6)
-KHUNG:  0xB2 0x1F 0x48 (Phát lặp 2 frame)
-CHU KỲ: Header 4.5ms/4.5ms, Bit0 550us/550us, Bit1 550us/1650us`;
-          showToast("🟢", "Đã gửi mã BẬT máy Funiki (Mã 6: 0xB2 0x1F 0x48)");
+          sendIrFrame('BẬT MÁY', currentCoolixState(), coolixStateNote());
+          showToast("🟢", `Đã gửi lệnh BẬT (${coolixStateNote()})`);
         } else {
-          document.getElementById('packetHexDisplay').innerText = 
-`// [PHÁT MÃ TẮT MÁY COOLIX]
-// Thương hiệu: ${brand.name} | Giao thức: COOLIX (24-bit MSB-first)
-LỆNH:   POWER_OFF (Mã 5)
-KHUNG:  0xB2 0x7B 0xE0 (Phát lặp 2 frame)
-CHU KỲ: Header 4.5ms/4.5ms, Bit0 550us/550us, Bit1 550us/1650us`;
-          showToast("🛑", "Đã gửi mã TẮT máy Funiki (Mã 5: 0xB2 0x7B 0xE0)");
+          sendIrFrame('TẮT MÁY', COOLIX_CMD.OFF, 'Lệnh Off cố định');
+          showToast("🛑", "Đã gửi lệnh TẮT máy");
         }
       } else if (action === 'MODE') {
-        if (!acState.power) {
-          showToast("⚠️", "Hãy bật nguồn điều hòa trước!");
-          return;
-        }
+        if (!requirePower()) return;
         miRemoteModeIndex = (miRemoteModeIndex + 1) % miRemoteModes.length;
-        updateMiRemoteUI();
-        showToast("❄️", `Chế độ: ${miRemoteModes[miRemoteModeIndex]}`);
+        applyMiStateChange('ĐỔI CHẾ ĐỘ', "❄️", `Chế độ: ${miRemoteModes[miRemoteModeIndex]}`);
       } else if (action === 'SPEED') {
-        if (!acState.power) {
-          showToast("⚠️", "Hãy bật nguồn điều hòa trước!");
-          return;
-        }
+        if (!requirePower()) return;
         miRemoteSpeedIndex = (miRemoteSpeedIndex + 1) % miRemoteSpeeds.length;
-        updateMiRemoteUI();
-        showToast("💨", `Tốc độ quạt: ${miRemoteSpeeds[miRemoteSpeedIndex]}`);
+        applyMiStateChange('ĐỔI TỐC ĐỘ QUẠT', "💨", `Tốc độ quạt: ${miRemoteSpeeds[miRemoteSpeedIndex]}`);
       } else if (action === 'DIRECTION') {
-        showToast("📐", "Đã gửi lệnh chỉnh nấc cánh vẫy gió (Step)");
+        if (!requirePower()) return;
+        sendIrFrame('CHỈNH NẤC CÁNH GIÓ', COOLIX_CMD.SWING_STEP, 'Lệnh SwingV cố định (mỗi lần bấm dịch 1 nấc)');
+        showToast("📐", "Đã gửi lệnh chỉnh nấc cánh gió");
       } else if (action === 'SWING') {
+        if (!requirePower()) return;
         miRemoteSwingOn = !miRemoteSwingOn;
         updateMiRemoteUI();
-        document.getElementById('packetHexDisplay').innerText = 
-`// [PHÁT MÃ ĐẢO GIÓ COOLIX SWING]
-LỆNH:   SWING_TOGGLE
-KHUNG:  0xB2 0x01 0xFE (Phát lặp 2 frame)`;
+        sendIrFrame('ĐẢO GIÓ', COOLIX_CMD.SWING, 'Lệnh Swing cố định (bấm lần nữa để dừng)');
         showToast("↔", `Đảo gió (Swing): ${miRemoteSwingOn ? "BẬT" : "TẮT"}`);
-      } else if (action === 'TEMP_DOWN') {
-        if (!acState.power) {
-          showToast("⚠️", "Hãy bật nguồn điều hòa trước!");
+      } else if (action === 'TEMP_DOWN' || action === 'TEMP_UP') {
+        if (!requirePower()) return;
+        if (miRemoteModes[miRemoteModeIndex] === 'FAN') {
+          showToast("ℹ️", "Chế độ Quạt không chỉnh được nhiệt độ");
           return;
         }
-        if (acState.temp > 16) {
-          acState.temp--;
-          activeConfig.temp = acState.temp;
-          document.getElementById('valTemp').innerText = `${acState.temp}°C`;
-          updateAcWallUnit();
-          updateMiRemoteUI();
-          showToast("❄️", `Nhiệt độ: ${acState.temp}°C`);
-        }
-      } else if (action === 'TEMP_UP') {
-        if (!acState.power) {
-          showToast("⚠️", "Hãy bật nguồn điều hòa trước!");
-          return;
-        }
-        if (acState.temp < 30) {
-          acState.temp++;
-          activeConfig.temp = acState.temp;
-          document.getElementById('valTemp').innerText = `${acState.temp}°C`;
-          updateAcWallUnit();
-          updateMiRemoteUI();
-          showToast("❄️", `Nhiệt độ: ${acState.temp}°C`);
-        }
+        const next = acState.temp + (action === 'TEMP_UP' ? 1 : -1);
+        if (next < COOLIX_TEMP_MIN || next > COOLIX_TEMP_MAX) return;
+        acState.temp = next;
+        activeConfig.temp = next;
+        document.getElementById('valTemp').innerText = `${next}°C`;
+        applyMiStateChange('ĐỔI NHIỆT ĐỘ', "❄️", `Nhiệt độ: ${next}°C`);
       } else if (action === 'TEMP_CLICK') {
         showToast("🌡️", `Nhiệt độ hiện tại: ${acState.temp}°C`);
       } else if (action === 'TIMER') {
         triggerOneClickTimer();
       } else if (action === 'SLEEP') {
-        showToast("🌙", "Đã gửi lệnh Chế độ ngủ đêm (Sleep Mode)");
+        if (!requirePower()) return;
+        sendIrFrame('CHẾ ĐỘ NGỦ', COOLIX_CMD.SLEEP, 'Lệnh Sleep cố định');
+        showToast("🌙", "Đã gửi lệnh Sleep");
       } else if (action === 'MORE') {
-        showToast("⚙️", "Cài đặt & Tùy chọn nâng cao điều hòa");
+        // Như Mi Remote: ••• mở thêm hàng phím phụ
+        document.getElementById('miExtraRow').classList.toggle('open');
+      } else if (action === 'TURBO' || action === 'LED' || action === 'CLEAN') {
+        if (!requirePower()) return;
+        const extra = { TURBO: 'Turbo', LED: 'Đèn màn hình LED', CLEAN: 'Tự làm sạch (Clean)' }[action];
+        sendIrFrame(extra.toUpperCase(), COOLIX_CMD[action], `Lệnh ${extra} cố định`);
+        showToast("✨", `Đã gửi lệnh ${extra}`);
       }
     }
 
@@ -2162,7 +2165,7 @@ KHUNG:  0xB2 0x01 0xFE (Phát lặp 2 frame)`;
     }
 
     function adjustTemp(delta) {
-      activeConfig.temp = Math.max(16, Math.min(30, activeConfig.temp + delta));
+      activeConfig.temp = Math.max(COOLIX_TEMP_MIN, Math.min(COOLIX_TEMP_MAX, activeConfig.temp + delta));
       document.getElementById('valTemp').innerText = `${activeConfig.temp}°C`;
     }
 
@@ -2194,7 +2197,14 @@ KHUNG:  0xB2 0x01 0xFE (Phát lặp 2 frame)`;
       const code = brand.codes[pairingStepIndex];
       const isCorrectCode = (pairingStepIndex === brand.workingCodeIndex);
 
-      generateHexInspectorForTest(brand, code);
+      if (code.proto === 'COOLIX') {
+        // Nút nguồn khi dò: đang tắt thì phát khung bật, đang bật thì phát lệnh Off
+        document.getElementById('packetHexDisplay').innerText = acState.power
+          ? describeCoolixFrame('DÒ MÃ - TẮT', COOLIX_CMD.OFF, `${brand.name} | Lệnh Off cố định`)
+          : describeCoolixFrame('DÒ MÃ - BẬT', currentCoolixState(), `${brand.name} | ${coolixStateNote()}`);
+      } else {
+        generateHexInspectorForTest(brand, code);
+      }
 
       if (isCorrectCode) {
         setTimeout(() => {
@@ -2244,11 +2254,17 @@ KHUNG:  0xB2 0x01 0xFE (Phát lặp 2 frame)`;
       const remaining = calculateRemainingToTarget(activeConfig.targetHour, activeConfig.targetMinute);
       const deltaMinutes = remaining.totalMinutes;
 
-      const brand = COMPREHENSIVE_BRANDS[activeConfig.brandKey];
-      const code = brand.codes[activeConfig.codeIndex];
+      const { brand, code } = getActiveCode();
 
-      const packetHex = generateTimerPacketHex(brand, code, activeConfig.temp, deltaMinutes);
-      document.getElementById('packetHexDisplay').innerText = packetHex;
+      if (code.proto === 'COOLIX') {
+        acState.temp = activeConfig.temp;
+        document.getElementById('packetHexDisplay').innerText =
+          describeCoolixFrame('BẬT + HẸN GIỜ 07:30', currentCoolixState(), `${brand.name} | ${coolixStateNote()}`) +
+          `\n\nHẸN GIỜ TẮT (${deltaMinutes} phút): khung hẹn giờ của Coolix chưa có trong đặc tả\nIRremoteESP8266, cần thử trên máy thật.`;
+      } else {
+        document.getElementById('packetHexDisplay').innerText =
+          generateTimerPacketHex(brand, code, activeConfig.temp, deltaMinutes);
+      }
 
       setTimeout(() => {
         playBeep(2200, 0.12);
@@ -2264,7 +2280,7 @@ KHUNG:  0xB2 0x01 0xFE (Phát lặp 2 frame)`;
       }, 250);
     }
 
-    let demoFanSpeedIndex = 0;
+    // Nhãn tiếng Việt cho nút Gió ở tab 1-Chạm (dùng chung miRemoteSpeedIndex)
     const demoFanSpeeds = ["Auto", "Thấp", "Vừa", "Cao"];
 
     function sendQuickCommand(type) {
@@ -2274,24 +2290,28 @@ KHUNG:  0xB2 0x01 0xFE (Phát lặp 2 frame)`;
       if (type === 'POWER_ON') {
         acState.power = true;
         acState.isBlowing = true;
-        showToast("🟢", `Đã gửi mã Bật điều hòa (${acState.temp}°C - Quạt ${demoFanSpeeds[demoFanSpeedIndex]})`);
+        sendIrFrame('BẬT MÁY', currentCoolixState(), coolixStateNote());
+        showToast("🟢", `Đã gửi mã Bật điều hòa (${coolixStateNote()})`);
       } else if (type === 'POWER_OFF') {
         acState.power = false;
         acState.timerOffAt = null;
         acState.isBlowing = false;
+        sendIrFrame('TẮT MÁY', COOLIX_CMD.OFF, 'Lệnh Off cố định');
         showToast("🛑", "Đã gửi mã Tắt điều hòa");
       } else if (type === 'FAN_SPEED') {
-        demoFanSpeedIndex = (demoFanSpeedIndex + 1) % demoFanSpeeds.length;
-        const btn = document.getElementById('demoFanSpeedBtn');
-        if (btn) btn.innerText = `💨 Gió: ${demoFanSpeeds[demoFanSpeedIndex]}`;
-        showToast("💨", `Tốc độ gió: ${demoFanSpeeds[demoFanSpeedIndex]}`);
+        miRemoteSpeedIndex = (miRemoteSpeedIndex + 1) % demoFanSpeeds.length;
+        sendIrFrame('ĐỔI TỐC ĐỘ QUẠT', currentCoolixState(), coolixStateNote());
+        showToast("💨", `Tốc độ gió: ${demoFanSpeeds[miRemoteSpeedIndex]}`);
       } else if (type === 'SWING') {
+        miRemoteSwingOn = !miRemoteSwingOn;
+        sendIrFrame('ĐẢO GIÓ', COOLIX_CMD.SWING, 'Lệnh Swing cố định (bấm lần nữa để dừng)');
         showToast("↔", "Đã gửi lệnh Đảo gió (Swing)");
       } else if (type === 'CANCEL_TIMER') {
         acState.timerOffAt = null;
         showToast("⏰", "Đã gửi mã Hủy hẹn giờ");
       }
       updateAcWallUnit();
+      updateMiRemoteUI();
     }
 
     function updateAcWallUnit() {

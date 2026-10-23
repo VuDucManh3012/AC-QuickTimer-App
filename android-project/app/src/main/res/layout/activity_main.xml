@@ -276,6 +276,9 @@
 
                                 <Button
                                     android:id="@+id/btn_temp_minus"
+                                    android:padding="0dp"
+                                    android:minWidth="0dp"
+                                    android:minHeight="0dp"
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
                                     android:background="@drawable/btn_mini_temp"
@@ -287,6 +290,9 @@
 
                                 <Button
                                     android:id="@+id/btn_temp_plus"
+                                    android:padding="0dp"
+                                    android:minWidth="0dp"
+                                    android:minHeight="0dp"
                                     android:layout_width="32dp"
                                     android:layout_height="32dp"
                                     android:layout_marginStart="6dp"
@@ -728,177 +734,128 @@
         </ScrollView>
 
         <!-- ========================================== -->
-        <!-- VIEW 4: MI REMOTE FULL CONTROLLER          -->
+        <!-- VIEW 4: MI REMOTE - CLONE APP MI REMOTE (DARK) -->
         <!-- ========================================== -->
         <LinearLayout
             android:id="@+id/view_remote"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#151515"
+            android:background="#141414"
             android:orientation="vertical"
             android:visibility="gone">
 
-            <!-- Header chuẩn Xiaomi: < Bedroom FunikiAC 🔥 ⋮ -->
+            <!-- Vùng hiển thị trạng thái: nhiệt độ + chế độ + trạng thái gió -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:gravity="center_vertical"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="#1E1E1E"
+                android:orientation="vertical"
                 android:paddingHorizontal="16dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/mi_btn_back"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:gravity="center"
-                    android:text="‹"
-                    android:textColor="#E5E7EB"
-                    android:textSize="26sp" />
+                android:paddingTop="14dp"
+                android:paddingBottom="12dp">
 
                 <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
                     android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="horizontal">
 
                     <TextView
+                        android:id="@+id/mi_tv_display_temp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Bedroom FunikiAC"
-                        android:textColor="#F3F4F6"
-                        android:textSize="17sp"
-                        android:textStyle="bold" />
+                        android:fontFamily="sans-serif-light"
+                        android:includeFontPadding="false"
+                        android:text="26"
+                        android:textColor="#4A4A4A"
+                        android:textSize="88sp" />
+
+                    <!-- °C góc trên, chế độ góc dưới -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="76dp"
+                        android:layout_marginStart="6dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/mi_tv_unit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="°C"
+                            android:textColor="#4A4A4A"
+                            android:textSize="15sp" />
+
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:layout_weight="1" />
+
+                        <TextView
+                            android:id="@+id/mi_tv_mode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Off"
+                            android:textColor="#A8A8A8"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Hàng trạng thái Speed / Direction / Swing -->
+                <LinearLayout
+                    android:id="@+id/mi_status_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.45"
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/mi_header_icon"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/mi_tv_status_speed"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:text="🔥"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:text="▤ Speed Auto"
+                        android:textColor="#8A8A8A"
+                        android:textSize="11sp" />
 
-                <TextView
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:gravity="center"
-                    android:text="⋮"
-                    android:textColor="#9CA3AF"
-                    android:textSize="20sp" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:singleLine="true"
+                        android:text="→ Direction Manual"
+                        android:textColor="#8A8A8A"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/mi_tv_status_swing"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:gravity="end"
+                        android:singleLine="true"
+                        android:text="≋ Fixed"
+                        android:textColor="#8A8A8A"
+                        android:textSize="11sp" />
+                </LinearLayout>
             </LinearLayout>
 
-            <!-- Màn hình hiển thị AC (Nửa trên) -->
-            <FrameLayout
-                android:id="@+id/mi_display_area"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="#181818">
-
-                <!-- Khi máy tắt -->
-                <TextView
-                    android:id="@+id/mi_tv_off_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="ĐIỀU HÒA ĐANG TẮT"
-                    android:textColor="#4B5563"
-                    android:textSize="13sp"
-                    android:letterSpacing="0.08"
-                    android:visibility="visible" />
-
-                <!-- Khi máy bật -->
-                <LinearLayout
-                    android:id="@+id/mi_layout_on_display"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/mi_tv_display_temp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="26"
-                            android:textColor="#FFFFFF"
-                            android:textSize="64sp"
-                            android:fontFamily="sans-serif-light" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="°C"
-                            android:textColor="#9CA3AF"
-                            android:textSize="20sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/mi_badge_mode"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/card_bg"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
-                            android:text="COOL"
-                            android:textColor="#06B6D4"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/mi_badge_speed"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:background="@drawable/card_bg"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
-                            android:text="SPEED: AUTO"
-                            android:textColor="#06B6D4"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/mi_badge_swing"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:background="@drawable/card_bg"
-                            android:paddingHorizontal="10dp"
-                            android:paddingVertical="4dp"
-                            android:text="SWING ON"
-                            android:textColor="#06B6D4"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
-            </FrameLayout>
-
-            <!-- Bàn phím điều khiển lưới phẳng (Nửa dưới) -->
+            <!-- Bàn phím lưới phẳng -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#202020"
                 android:orientation="vertical">
 
-                <!-- Hàng 1: Nguồn (icon tròn xanh lá) & Mode -->
+                <!-- Hàng 1: Nguồn | Mode -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="64dp"
+                    android:layout_height="80dp"
                     android:orientation="horizontal">
 
                     <FrameLayout
@@ -912,158 +869,107 @@
 
                         <ImageView
                             android:id="@+id/mi_iv_power_icon"
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/ic_power_green" />
+                            android:contentDescription="Bật/Tắt nguồn"
+                            android:src="@drawable/ic_power_gray" />
                     </FrameLayout>
 
                     <Button
                         android:id="@+id/mi_btn_mode"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/mi_grid_cell"
-                        android:backgroundTint="@null"
-                        android:text="Mode"
-                        android:textColor="#D1D5DB"
-                        android:textSize="15sp" />
+                        style="@style/MiKey"
+                        android:text="Mode" />
                 </LinearLayout>
 
                 <!-- Hàng 2: Speed | Direction | Swing -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="64dp"
+                    android:layout_height="80dp"
                     android:orientation="horizontal">
 
                     <Button
                         android:id="@+id/mi_btn_speed"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/mi_grid_cell"
-                        android:backgroundTint="@null"
-                        android:text="Speed"
-                        android:textColor="#D1D5DB"
-                        android:textSize="14sp" />
+                        style="@style/MiKey"
+                        android:text="Speed" />
 
                     <Button
                         android:id="@+id/mi_btn_direction"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/mi_grid_cell"
-                        android:backgroundTint="@null"
-                        android:text="Direction"
-                        android:textColor="#D1D5DB"
-                        android:textSize="14sp" />
+                        style="@style/MiKey"
+                        android:text="Direction" />
 
                     <Button
                         android:id="@+id/mi_btn_swing"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/mi_grid_cell"
-                        android:backgroundTint="@null"
-                        android:text="Swing"
-                        android:textColor="#D1D5DB"
-                        android:textSize="14sp" />
+                        style="@style/MiKey.Dim"
+                        android:text="Swing" />
                 </LinearLayout>
 
-                <!-- Hàng 3: Temp — | Temp | + -->
+                <!-- Hàng 3: − | Temp | + -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="64dp"
+                    android:layout_height="80dp"
                     android:orientation="horizontal">
 
                     <Button
                         android:id="@+id/mi_btn_temp_down"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/mi_grid_cell"
-                        android:backgroundTint="@null"
-                        android:text="—"
-                        android:textColor="#FFFFFF"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
+                        style="@style/MiKey.Big"
+                        android:text="−" />
 
                     <Button
                         android:id="@+id/mi_btn_temp_click"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/mi_grid_cell"
-                        android:backgroundTint="@null"
-                        android:text="Temp"
-                        android:textColor="#D1D5DB"
-                        android:textSize="14sp" />
+                        style="@style/MiKey"
+                        android:text="Temp" />
 
                     <Button
                         android:id="@+id/mi_btn_temp_up"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/mi_grid_cell"
-                        android:backgroundTint="@null"
-                        android:text="+"
-                        android:textColor="#FFFFFF"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
+                        style="@style/MiKey.Big"
+                        android:text="+" />
                 </LinearLayout>
 
                 <!-- Hàng 4: Timer | Sleep | ••• -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="64dp"
+                    android:layout_height="80dp"
                     android:orientation="horizontal">
 
                     <Button
                         android:id="@+id/mi_btn_timer"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/mi_grid_cell"
-                        android:backgroundTint="@null"
-                        android:text="Timer"
-                        android:textColor="#D1D5DB"
-                        android:textSize="14sp" />
+                        style="@style/MiKey.Dim"
+                        android:text="Timer" />
 
                     <Button
                         android:id="@+id/mi_btn_sleep"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/mi_grid_cell"
-                        android:backgroundTint="@null"
-                        android:text="Sleep"
-                        android:textColor="#D1D5DB"
-                        android:textSize="14sp" />
+                        style="@style/MiKey.Dim"
+                        android:text="Sleep" />
 
                     <Button
                         android:id="@+id/mi_btn_more"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/mi_grid_cell"
-                        android:backgroundTint="@null"
-                        android:text="•••"
-                        android:textColor="#D1D5DB"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        style="@style/MiKey.Dim"
+                        android:text="···" />
                 </LinearLayout>
 
-                <!-- Home bar bottom -->
+                <!-- Hàng phím phụ, mở bằng ••• -->
                 <LinearLayout
+                    android:id="@+id/mi_extra_row"
                     android:layout_width="match_parent"
-                    android:layout_height="22dp"
-                    android:gravity="center"
-                    android:background="#1E1E1E">
+                    android:layout_height="80dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
 
-                    <View
-                        android:layout_width="72dp"
-                        android:layout_height="4dp"
-                        android:background="#52525B" />
+                    <Button
+                        android:id="@+id/mi_btn_turbo"
+                        style="@style/MiKey"
+                        android:text="Turbo" />
+
+                    <Button
+                        android:id="@+id/mi_btn_led"
+                        style="@style/MiKey"
+                        android:text="Light" />
+
+                    <Button
+                        android:id="@+id/mi_btn_clean"
+                        style="@style/MiKey"
+                        android:text="Clean" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

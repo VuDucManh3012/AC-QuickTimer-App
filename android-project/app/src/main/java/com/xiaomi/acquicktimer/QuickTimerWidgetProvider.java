@@ -73,9 +73,9 @@ public class QuickTimerWidgetProvider extends AppWidgetProvider {
             int[] powerOnPattern = AcProtocolDatabase.buildPowerOnPattern(brand, code, temp, fanSpeed);
             boolean ok1 = transmitter.transmit(brand.carrier, powerOnPattern);
 
-            // Delay 350ms
+            // Nghỉ cho máy lạnh xử lý xong lệnh Bật
             try {
-                Thread.sleep(350);
+                Thread.sleep(AcProtocolDatabase.COMMAND_GAP_MS);
             } catch (InterruptedException ignored) {}
 
             // BƯỚC 2: Phát lệnh Hẹn Giờ Tắt (Coolix-48)
